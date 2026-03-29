@@ -6,7 +6,7 @@
 <title>Poitiers-Migné Échecs</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
 <style>
 :root{
   --navy:#0C1A3A;--navy-mid:#162852;--blue:#2563EB;--blue-h:#1D4ED8;
@@ -399,22 +399,22 @@ a{text-decoration:none;cursor:pointer}
     <section class="page-section active" id="section-home">
       <div class="welcome-banner">
         <h2>Bon retour, <span id="welcome-name">joueur</span> ! ♟</h2>
-        <p>Données ELO et classement chargés depuis Supabase</p>
+        <p>Données ELO et classement chargés depuis sb</p>
         <button class="btn-play" onclick="goTo('game')">▶ Lancer une partie</button>
         <div class="welcome-deco">♚</div>
       </div>
       <div class="stats-row">
-        <div class="stat-card dk"><div class="stat-lbl">ELO actuel</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Victoires</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Taux victoire</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Rang club</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
+        <div class="stat-card dk"><div class="stat-lbl">ELO actuel</div><div class="stat-val">—</div><div class="stat-sub">Via sb</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Victoires</div><div class="stat-val">—</div><div class="stat-sub">Via sb</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Taux victoire</div><div class="stat-val">—</div><div class="stat-sub">Via sb</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Rang club</div><div class="stat-val">—</div><div class="stat-sub">Via sb</div></div>
       </div>
       <div class="card" style="padding:18px 22px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
           <h3 style="font-family:'Fraunces',serif;font-size:16px;color:var(--navy)">Classement du club</h3>
           <a onclick="goTo('membres')" style="font-size:12px;color:var(--blue);font-weight:600">Voir tous →</a>
         </div>
-        <div class="empty-state"><div class="ei">🏆</div><p>Le classement s'affichera ici<br>une fois connecté à Supabase.</p></div>
+        <div class="empty-state"><div class="ei">🏆</div><p>Le classement s'affichera ici<br>une fois connecté à sb.</p></div>
       </div>
     </section>
 
@@ -423,7 +423,7 @@ a{text-decoration:none;cursor:pointer}
       <div class="page-hd"><h2>Membres du club</h2><p>Statut en ligne, classement ELO et défis.</p></div>
       <div class="search-bar"><span class="si">🔍</span><input type="text" id="member-search" placeholder="Rechercher un membre…" oninput="filterMembers(this.value)"></div>
       <div class="members-grid" id="members-grid">
-        <div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Les membres s'afficheront ici<br>une fois connecté à Supabase.</p></div>
+        <div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Les membres s'afficheront ici<br>une fois connecté à sb.</p></div>
       </div>
     </section>
 
@@ -431,23 +431,23 @@ a{text-decoration:none;cursor:pointer}
     <section class="page-section" id="section-stats">
       <div class="page-hd"><h2>Mes statistiques</h2><p>Progression et performances.</p></div>
       <div class="stats-row">
-        <div class="stat-card dk"><div class="stat-lbl">ELO</div><div class="stat-val">—</div><div class="stat-sub">Supabase</div></div>
-        <div class="stat-card"><div class="stat-lbl">Parties</div><div class="stat-val">—</div><div class="stat-sub">Supabase</div></div>
+        <div class="stat-card dk"><div class="stat-lbl">ELO</div><div class="stat-val">—</div><div class="stat-sub">sb</div></div>
+        <div class="stat-card"><div class="stat-lbl">Parties</div><div class="stat-val">—</div><div class="stat-sub">sb</div></div>
         <div class="stat-card"><div class="stat-lbl">Victoires</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Nulles</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Défaites</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
       </div>
-      <div class="chart-card"><h3>Progression ELO</h3><div class="empty-state"><div class="ei">📈</div><p>Graphique disponible via Supabase.</p></div></div>
+      <div class="chart-card"><h3>Progression ELO</h3><div class="empty-state"><div class="ei">📈</div><p>Graphique disponible via sb.</p></div></div>
       <div class="two-col">
-        <div class="donut-card"><h3>Résultats globaux</h3><div class="empty-state"><div class="ei">🥧</div><p>Données Supabase</p></div></div>
-        <div class="opp-card"><h3>Adversaires fréquents</h3><div class="empty-state"><div class="ei">⚔️</div><p>Données Supabase</p></div></div>
+        <div class="donut-card"><h3>Résultats globaux</h3><div class="empty-state"><div class="ei">🥧</div><p>Données sb</p></div></div>
+        <div class="opp-card"><h3>Adversaires fréquents</h3><div class="empty-state"><div class="ei">⚔️</div><p>Données sb</p></div></div>
       </div>
     </section>
 
     <!-- PARTIES RÉCENTES -->
     <section class="page-section" id="section-recentes">
       <div class="page-hd"><h2>Parties récentes</h2><p>Historique complet de vos parties.</p></div>
-      <div class="games-list" id="games-list"><div class="empty-state"><div class="ei">♜</div><p>Vos parties apparaîtront ici<br>une fois connecté à Supabase.</p></div></div>
+      <div class="games-list" id="games-list"><div class="empty-state"><div class="ei">♜</div><p>Vos parties apparaîtront ici<br>une fois connecté à sb.</p></div></div>
     </section>
 
     <!-- CHAT -->
@@ -464,7 +464,7 @@ a{text-decoration:none;cursor:pointer}
         <div class="chat-main">
           <div class="chat-top">
             <h3 id="chat-ch-title"># général</h3>
-            <span>Temps réel via Supabase Realtime</span>
+            <span>Temps réel via sb Realtime</span>
           </div>
           <div class="chat-msgs" id="chat-msgs"></div>
           <div class="chat-inp-wrap">
@@ -573,14 +573,15 @@ a{text-decoration:none;cursor:pointer}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
 <script>
-// --- CONFIGURATION SUPABASE ---
-const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ZXVlc3BtZ2J4Z3hjYWloZXJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDM5MjUsImV4cCI6MjA5MDM3OTkyNX0.h0EjR6sCeqapXmZOdZSaF-W1EsFSqYk5mK0B42BYV4o';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ------------------------------
+// --- CONFIGURATION sb ---
+const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.sb.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Ta clé complète
+// Utilise "sb" pour éviter le conflit avec l'objet global "sb"
+const sb = sb.createClient(sb_URL, sb_ANON_KEY); 
+// ------------------------------------
 /* ═══ ADMIN ═══ */
 async function loadPendingUsers() {
-  const { data, error } = await supabase.from('profiles').select('*').eq('account_status', 'pending');
+  const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'pending');
   const list = document.getElementById('pending-users-list');
   
   if (error || data.length === 0) {
@@ -602,13 +603,13 @@ async function loadPendingUsers() {
 }
 
 async function acceptUser(userId) {
-  await supabase.from('profiles').update({ account_status: 'accepted' }).eq('id', userId);
+  await sb.from('profiles').update({ account_status: 'accepted' }).eq('id', userId);
   showToast('✅ Joueur accepté !');
   loadPendingUsers();
 }
 
 async function rejectUser(userId) {
-  await supabase.from('profiles').update({ account_status: 'rejected' }).eq('id', userId);
+  await sb.from('profiles').update({ account_status: 'rejected' }).eq('id', userId);
   showToast('❌ Joueur refusé.');
   loadPendingUsers();
 }
@@ -619,11 +620,11 @@ function listenToChatRealtime() {
   fetchMessages(); 
 
   // Écouter les nouveaux messages en temps réel
-  supabase
+  sb
     .channel('public:chat_messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
       const msg = payload.new;
-      if (msg.channel === curCh) {a
+      if (msg.channel === curCh) {
         // Ajouter le message à l'interface (simplifié ici, tu pourras faire une jointure pour le nom de l'auteur)
         CHAT[curCh].push({ author: "Membre", init: "?", col: 'av-1', t: msg.content, time: "Maintenant" });
         renderChat();
@@ -633,7 +634,7 @@ function listenToChatRealtime() {
 }
 
 async function fetchMessages() {
-    const { data } = await supabase.from('chat_messages').select('*').eq('channel', curCh).order('created_at', { ascending: true });
+    const { data } = await sb.from('chat_messages').select('*').eq('channel', curCh).order('created_at', { ascending: true });
     if(data) {
         CHAT[curCh] = data.map(m => ({ author: "Membre", init: "?", t: m.content, time: "..." }));
         renderChat();
@@ -666,7 +667,7 @@ let topicCtr=4,curTopic=null;
 
 /* ═══ CHAT DATA ═══ */
 const CHAT={
-  general:   [{sys:true,t:'Bienvenue dans #général ! Messages en temps réel via Supabase Realtime.'}],
+  general:   [{sys:true,t:'Bienvenue dans #général ! Messages en temps réel via sb Realtime.'}],
   resultats: [{sys:true,t:'Canal #résultats — publiez vos scores ici.'}],
   analyse:   [{sys:true,t:'Canal #analyse — partagez positions et lignes.'}],
   'hors-sujet':[{sys:true,t:'Canal #hors-sujet — tout ce qui ne concerne pas les échecs !'}],
@@ -682,7 +683,7 @@ function showAuth(p){
   if(p==='register') document.getElementById('page-register').classList.remove('hidden');
   if(p==='app')      document.getElementById('app').classList.remove('hidden');
 }
-// --- UTILITAIRE : Convertir un pseudo en faux email pour Supabase ---
+// --- UTILITAIRE : Convertir un pseudo en faux email pour sb ---
 function pseudoToEmail(pseudo) {
   return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local';
 }
@@ -694,19 +695,19 @@ async function doLogin() {
   if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
 
   const email = pseudoToEmail(pseudo);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
 
   if (error) {
     showToast('❌ Identifiants incorrects.');
   } else {
     // Vérifier le statut de validation
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
     
     if (profile.account_status === 'pending') {
-      await supabase.auth.signOut();
+      await sb.auth.signOut();
       showToast('⏳ Ton compte est en attente de validation par un admin.');
     } else if (profile.account_status === 'rejected') {
-      await supabase.auth.signOut();
+      await sb.auth.signOut();
       showToast('❌ Ton compte a été refusé.');
     } else {
       enterApp(profile);
@@ -723,7 +724,7 @@ async function doRegister() {
   if (pw.length < 8) { showToast('⚠️ Mot de passe trop court (8 min).'); return; }
 
   const email = pseudoToEmail(pseudo);
-  const { error } = await supabase.auth.signUp({ 
+  const { error } = await sb.auth.signUp({ 
     email, 
     password: pw,
     options: { data: { full_name: pseudo } } // Passé au trigger SQL
@@ -765,7 +766,7 @@ function listenToChatRealtime() {
   fetchMessages(); 
 
   // Écouter les nouveaux messages en temps réel
-  supabase
+  sb
     .channel('public:chat_messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
       const msg = payload.new;
@@ -818,7 +819,7 @@ function openModal(opp){
   const av=document.getElementById('modal-av');
   av.textContent=init; av.className='modal-opp-av '+(opp.col||'av-1');
   document.getElementById('modal-nm').textContent=opp.name||'—';
-  document.getElementById('modal-elo').textContent=opp.elo?`ELO ${opp.elo}`:'ELO chargé depuis Supabase';
+  document.getElementById('modal-elo').textContent=opp.elo?`ELO ${opp.elo}`:'ELO chargé depuis sb';
   document.getElementById('modal-ov').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modal-ov').classList.add('hidden');}
@@ -826,7 +827,7 @@ function confirmChallenge(){
   const name=modalOpp?modalOpp.name:'—';
   closeModal();goTo('game');
   document.getElementById('game-vs').textContent=`vs ${name} · ${selCad.nm} ${selCad.sub}`;
-  setTimeout(()=>showToast(`⚔️ Défi envoyé à ${name} — ${selCad.t} (Supabase à venir)`),300);
+  setTimeout(()=>showToast(`⚔️ Défi envoyé à ${name} — ${selCad.t} (sb à venir)`),300);
 }
 
 /* ═══ MEMBRES — défi depuis la grille ═══ */
@@ -838,10 +839,10 @@ function findRandom(){
   cd.style.display='none'; sp.style.display='block';
   setTimeout(()=>{
     sp.style.display='none';
-    // → Supabase : récupérer un joueur en ligne aléatoire
+    // → sb : récupérer un joueur en ligne aléatoire
     matchedOpp={name:'Joueur en ligne',col:'av-3',elo:null};
     document.getElementById('matched-name').textContent=matchedOpp.name;
-    document.getElementById('matched-elo').textContent='ELO chargé depuis Supabase';
+    document.getElementById('matched-elo').textContent='ELO chargé depuis sb';
     cd.style.display='block';
   },2200);
 }
@@ -872,12 +873,12 @@ async function sendChat() {
   const text = inp.value.trim();
   if (!text) return;
 
-  const { error } = await supabase
+  const { error } = await sb
     .from('chat_messages')
     .insert([{ 
         channel: curCh, 
         content: text,
-        author_id: (await supabase.auth.getUser()).data.user.id 
+        author_id: (await sb.auth.getUser()).data.user.id 
     }]);
 
   if (error) showToast('Erreur d\'envoi');
@@ -938,7 +939,7 @@ function submitTopic(){
   const icon=cat.split(' ')[0];
   TOPICS.push({id:topicCtr++,icon,title,cat:cat.replace(/^.\s/,''),author:me.name,ainit:me.init,acol:'av-1',date,
     replies:[{author:me.name,ainit:me.init,acol:'av-1',date,body}]});
-  // → supabase.from('topics').insert(...)
+  // → sb.from('topics').insert(...)
   document.getElementById('ntf-title').value='';
   document.getElementById('ntf-body').value='';
   toggleNTF();renderTopics();showToast('✅ Sujet publié !');
@@ -950,7 +951,7 @@ function submitReply(){
   const t=TOPICS.find(t=>t.id===curTopic);if(!t)return;
   const date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   t.replies.push({author:me.name,ainit:me.init,acol:'av-1',date,body:text});
-  // → supabase.from('replies').insert(...)
+  // → sb.from('replies').insert(...)
   document.getElementById('reply-inp').value='';
   renderPosts(t);
   document.getElementById('detail-meta').textContent=`${t.cat} · ${t.date} · ${t.replies.length} réponse(s)`;
