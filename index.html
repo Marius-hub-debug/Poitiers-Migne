@@ -573,11 +573,12 @@ a{text-decoration:none;cursor:pointer}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
 <script>
-// --- CONFIGURATION sb ---
-const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.sb.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Ta clé complète
-// Utilise "sb" pour éviter le conflit avec l'objet global "sb"
-const sb = sb.createClient(sb_URL, sb_ANON_KEY); 
+// --- CONFIGURATION SUPABASE ---
+const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co'; // Vérifie bien l'URL (.co et non .sb.co)
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
+
+// "supabase" est l'objet de la bibliothèque, "sb" est ton instance personnalisée
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 // ------------------------------------
 /* ═══ ADMIN ═══ */
 async function loadPendingUsers() {
@@ -687,9 +688,49 @@ function showAuth(p){
 function pseudoToEmail(pseudo) {
   return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local';
 }
-
+  async function loadMembers() {
+  const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'accepted').order('elo', { ascending: false });
+  const grid = document.getElementById('members-grid');
+  
+  if (data) {
+    grid.innerHTML = data.map(p => `
+      <div class="member-card">
+        <div class="m-av ${p.avatar_color || 'av-1'}">${p.full_name.substring(0,2).toUpperCase()}</div>
+        <div class="m-info">
+          <div class="m-name">${p.full_name}</div>
+          <div class="m-elo">ELO ${p.elo}</div>
+        </div>
+        <button class="btn-defy" onclick="defyMember('${p.full_name}', '${p.avatar_color}')">Défier</button>
+      </div>
+    `).join('');
+  }
+}
+  function enterApp(profile) {
+  const init = profile.full_name.substring(0, 2).toUpperCase();
+  me = { id: profile.id, name: profile.full_name, init: init, isAdmin: profile.is_admin };
+  
+  // Mise à jour de la barre latérale
+  document.getElementById('sb-name').textContent = profile.full_name;
+  document.getElementById('sb-avatar').textContent = init;
+  document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
+  
+  // Affichage du panneau Admin si l'utilisateur l'est
+  if (profile.is_admin) {
+    document.getElementById('nav-lbl-admin').style.display = 'block';
+    document.getElementById('nav-admin').style.display = 'flex';
+    if (!PAGES.includes('admin')) PAGES.push('admin');
+    loadPendingUsers();
+  }
+  
+  showAuth('app');
+  initCadGrid();
+  renderTopics();
+  loadMembers(); // <--- AJOUTÉ ICI : Charge la liste des joueurs
+  listenToChatRealtime();
+  goTo('home');
+}
 async function doLogin() {
-  const pseudo = document.getElementById('login-pseudo').value.trim();
+  const pseudo = document.getElementById('reg-pseudo').value.trim();
   const pw = document.getElementById('login-pw').value;
 
   if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
@@ -737,30 +778,7 @@ async function doRegister() {
     showAuth('login');
   }
 }
-
-function enterApp(profile) {
-  const init = profile.full_name.substring(0, 2).toUpperCase();
-  me = { id: profile.id, name: profile.full_name, init: init, isAdmin: profile.is_admin };
   
-  document.getElementById('sb-name').textContent = profile.full_name;
-  document.getElementById('sb-avatar').textContent = init;
-  document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
-  
-  // Afficher le menu admin si l'utilisateur est admin
-  if (profile.is_admin) {
-    document.getElementById('nav-lbl-admin').style.display = 'block';
-    document.getElementById('nav-admin').style.display = 'flex';
-    if (!PAGES.includes('admin')) PAGES.push('admin'); // FIX: Évite les doublons
-    loadPendingUsers();
-  }
-  
-  showAuth('app');
-  initCadGrid();
-  renderTopics();
-  listenToChatRealtime();
-  goTo('home');
-}
-
 function listenToChatRealtime() {
   // Charger les messages existants
   fetchMessages(); 
