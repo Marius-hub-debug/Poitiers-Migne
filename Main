@@ -6,7 +6,7 @@
 <title>Poitiers-Migné Échecs</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --navy:#0C1A3A;--navy-mid:#162852;--blue:#2563EB;--blue-h:#1D4ED8;
@@ -574,12 +574,14 @@ a{text-decoration:none;cursor:pointer}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
 <script>
 // --- CONFIGURATION SUPABASE ---
-const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co'; // Vérifie bien l'URL (.co et non .sb.co)
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
+// L'URL doit finir par .supabase.co
+const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Ta clé complète ici
 
-// "supabase" est l'objet de la bibliothèque, "sb" est ton instance personnalisée
+// "supabase" est l'objet chargé par le CDN (l'outil)
+// "sb" est ton instance personnelle (ta connexion)
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
-// ------------------------------------
+// ------------------------------
 /* ═══ ADMIN ═══ */
 async function loadPendingUsers() {
   const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'pending');
