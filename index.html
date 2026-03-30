@@ -715,19 +715,19 @@ function showAuth(p) { ['page-login','page-register','app'].forEach(id => { cons
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
 
 function goTo(id) {
-  PAGES.forEach(s => { 
-    const sec = document.getElementById('section-'+s);
-    if(sec) sec.classList.remove('active');
-    const nav = document.getElementById('nav-'+s); 
-    if(nav) nav.classList.remove('active'); 
+  PAGES.forEach(s => {
+    const sec = document.getElementById('section-' + s);
+    const nav = document.getElementById('nav-' + s);
+    if (sec) sec.classList.remove('active'); // On vérifie si l'élément existe
+    if (nav) nav.classList.remove('active');
   });
-  const targetSec = document.getElementById('section-'+id);
-  if(targetSec) targetSec.classList.add('active');
-  const targetNav = document.getElementById('nav-'+id);
-  if(targetNav) targetNav.classList.add('active');
-  if(id === 'game') initBoard();
+  const targetSec = document.getElementById('section-' + id);
+  if (targetSec) targetSec.classList.add('active');
+  const targetNav = document.getElementById('nav-' + id);
+  if (targetNav) targetNav.classList.add('active');
+  
+  if (id === 'game') initBoard();
 }
-
 // --- AUTHENTIFICATION ---
 async function doLogin() {
   const pseudo = document.getElementById('login-pseudo').value.trim();
