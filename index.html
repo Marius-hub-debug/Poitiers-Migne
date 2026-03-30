@@ -696,7 +696,7 @@ let myColor = 'w';
 let modalOpp = null;
 let curCh = 'general';
 const CHAT = { general: [], resultats: [], analyse: [], 'hors-sujet': [] };
-const PAGES = ['home','membres','stats','recentes','random', 'game','chat','admin'];
+const PAGES = ['home','membres','random', 'game','chat','admin'];
 
 let game = null, board = null, boardInited = false;
 let whiteTime = 0, blackTime = 0, clockInterval = null;
@@ -752,9 +752,13 @@ async function doRegister() {
 
 async function enterApp(profile) {
   me = profile;
+  me.init = profile.full_name.substring(0,2).toUpperCase();
+  
+  // On marque l'utilisateur comme en ligne dans Supabase
   await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
+
   document.getElementById('sb-name').textContent = profile.full_name;
-  document.getElementById('sb-avatar').textContent = profile.full_name.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = me.init;
   document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
   
   if (profile.is_admin) {
@@ -771,7 +775,6 @@ async function enterApp(profile) {
   updateOnlineCount();
   goTo('home');
 }
-
 async function doLogout() {
   if(me.id) await sb.from('profiles').update({ is_online: false }).eq('id', me.id);
   await sb.auth.signOut();
@@ -848,10 +851,21 @@ function initBoard() {
   board = Chessboard('board', {
     draggable: true, position: 'start',
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-    onDragStart: (source, piece) => {
+onDragStart: (source, piece) => {
+      // 1. Ne pas bouger si la partie est finie
       if (game.game_over()) return false;
-      if (piece.charAt(0) !== myColor) return false; // BLOQUE LES PIÈCES ADVERSES
-      if (game.turn() !== myColor) return false;     // BLOQUE LE COUP SI PAS TON TOUR
+
+      // 2. Ne bouger que ses propres pièces (myColor est 'w' ou 'b')
+      if ((myColor === 'w' && piece.search(/^b/) !== -1) ||
+          (myColor === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
+      }
+
+      // 3. Ne bouger que si c'est son tour
+      if ((game.turn() === 'w' && myColor !== 'w') ||
+          (game.turn() === 'b' && myColor !== 'b')) {
+        return false;
+      }
     },
     onDrop: async (src, tgt) => {
       const move = game.move({ from: src, to: tgt, promotion: 'q' });
