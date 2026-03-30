@@ -582,6 +582,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // "sb" est ton instance personnelle (ta connexion)
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 // ------------------------------
+  let current_game_id = null;
 /* ═══ ADMIN ═══ */
 async function loadPendingUsers() {
   const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'pending');
@@ -616,23 +617,28 @@ async function rejectUser(userId) {
   showToast('❌ Joueur refusé.');
   loadPendingUsers();
 }
-  function listenToGames() {
+ function listenToGames() {
     sb.channel('db_games')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, payload => {
         const newGame = payload.new;
-        // Si je suis le joueur noir et que la partie est nouvelle
+        // Si je suis le joueur défié (Noir)
         if (newGame.black_player_id === me.id && newGame.status === 'pending') {
-            if(confirm("⚔️ Tu as reçu un défi ! Accepter ?")) {
+            showToast("⚔️ Nouveau défi reçu !");
+            if(confirm(`⚔️ ${newGame.cadence} : Accepter le défi ?`)) {
                 acceptChallenge(newGame.id);
             }
         }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, payload => {
-        // C'est ici qu'on reçoit le coup de l'adversaire !
-        if (payload.new.id === current_game_id && payload.new.last_move_by !== me.id) {
-            game.move(payload.new.last_move);
-            board.position(game.fen());
-            updateStatus();
+        const updatedGame = payload.new;
+        if (updatedGame.id === current_game_id) {
+            // Si l'adversaire a joué un coup
+            if (updatedGame.last_move_by !== me.id) {
+                game.move(updatedGame.last_move);
+                board.position(game.fen());
+                updateStatus();
+                updateHistory();
+            }
         }
     })
     .subscribe();
@@ -641,9 +647,14 @@ async function rejectUser(userId) {
 async function acceptChallenge(gameId) {
     current_game_id = gameId;
     await sb.from('games').update({ status: 'in_progress' }).eq('id', gameId);
+    
     goTo('game');
+    
+    // Si je suis le joueur Noir (celui qui accepte), je retourne le plateau
+    setTimeout(() => {
+        if(board) board.orientation('black');
+    }, 500);
 }
-
 /* ═══ REALTIME CHAT ═══ */
 function listenToChatRealtime() {
   // Charger les messages existants
@@ -717,8 +728,8 @@ function showAuth(p){
 function pseudoToEmail(pseudo) {
   return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local';
 }
-  async function loadMembers() {
-  const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'accepted').order('elo', { ascending: false });
+async function loadMembers() {
+  const { data } = await sb.from('profiles').select('*').eq('account_status', 'accepted').order('elo', { ascending: false });
   const grid = document.getElementById('members-grid');
   
   if (data) {
@@ -729,10 +740,15 @@ function pseudoToEmail(pseudo) {
           <div class="m-name">${p.full_name}</div>
           <div class="m-elo">ELO ${p.elo}</div>
         </div>
-        <button class="btn-defy" onclick="defyMember('${p.full_name}', '${p.avatar_color}')">Défier</button>
+        <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}', col:'${p.avatar_color}'})">Défier</button>
       </div>
     `).join('');
   }
+}
+
+// Et modifie defyMember pour qu'il reçoive l'objet
+function defyMember(targetUser) {
+    openModal(targetUser);
 }
   function enterApp(profile) {
   const init = profile.full_name.substring(0, 2).toUpperCase();
@@ -756,11 +772,14 @@ function pseudoToEmail(pseudo) {
   renderTopics();
   loadMembers(); // <--- AJOUTÉ ICI : Charge la liste des joueurs
   listenToChatRealtime();
+    listenToGames();
   goTo('home');
 }
 async function doLogin() {
-const pseudo = document.getElementById('login-pseudo').value.trim();
+  // CORRECTION ICI : login-pseudo au lieu de reg-pseudo
+  const pseudo = document.getElementById('login-pseudo').value.trim(); 
   const pw = document.getElementById('login-pw').value;
+  // ... reste du code
 
   if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
 
@@ -1051,11 +1070,10 @@ async function onDrop(src, tgt) {
     const move = game.move({ from: src, to: tgt, promotion: 'q' });
     if (!move) return 'snapback';
 
-    // Envoyer le coup à Supabase
     if (current_game_id) {
         await sb.from('games').update({ 
             pgn: game.pgn(),
-            last_move: move.san,
+            last_move: move.san, // Le coup en notation échecs (ex: e4)
             last_move_by: me.id 
         }).eq('id', current_game_id);
     }
