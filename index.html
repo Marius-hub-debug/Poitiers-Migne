@@ -529,22 +529,30 @@ a{text-decoration:none;cursor:pointer}
     </section>
 
     <!-- JEU -->
-    <section class="page-section" id="section-game">
-      <div class="page-hd"><h2>Partie en cours</h2><p id="game-vs">Partie libre</p></div>
-      <div class="game-layout">
-        <div id="board"></div>
-        <div class="game-panel">
-          <h3>♟ Situation</h3>
-          <div id="status-display">Tour des Blancs</div>
-          <div class="game-btns">
-            <button class="btn-game" onclick="undoMove()">↩ Annuler</button>
-            <button class="btn-game" onclick="resetGame()">🔄 Rejouer</button>
-          </div>
-          <div class="hist-lbl">Historique</div>
-          <div id="history-display"></div>
+   <section class="page-section" id="section-game">
+    <div id="game-lobby">
+        <div class="page-hd">
+            <h2>Lobby de Jeu</h2>
+            <p>Choisissez un membre en ligne pour le défier en duel.</p>
         </div>
-      </div>
-    </section>
+        <div class="members-grid" id="lobby-members-grid">
+            </div>
+    </div>
+
+    <div id="game-board-area" class="hidden">
+        <div class="page-hd">
+            <h2 id="game-vs-title">Partie en cours</h2>
+            <button class="btn-game" onclick="quitGame()" style="width:auto; padding:5px 10px">⏻ Quitter</button>
+        </div>
+        <div class="game-layout">
+            <div id="board"></div>
+            <div class="game-panel">
+                <div id="status-display">Trait aux Blancs</div>
+                <div id="history-display" style="flex:1; overflow-y:auto; font-size:12px; margin-top:10px; color:var(--g500)"></div>
+            </div>
+        </div>
+    </div>
+</section>
 
   </main>
 </div>
@@ -582,8 +590,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // "sb" est ton instance personnelle (ta connexion)
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 // ------------------------------
-  let current_game_id = null;
-/* ═══ ADMIN ═══ */
+  /* ═══ ADMIN ═══ */
 async function loadPendingUsers() {
   const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'pending');
   const list = document.getElementById('pending-users-list');
@@ -617,43 +624,104 @@ async function rejectUser(userId) {
   showToast('❌ Joueur refusé.');
   loadPendingUsers();
 }
- function listenToGames() {
-    sb.channel('db_games')
+
+
+  let current_game_id = null;
+
+// 1. Charger les membres dans le Lobby "Jouer"
+async function loadLobby() {
+    const { data } = await sb.from('profiles')
+        .select('*')
+        .eq('account_status', 'accepted')
+        .neq('id', me.id); // Ne pas s'afficher soi-même
+
+    const grid = document.getElementById('lobby-members-grid');
+    if (data) {
+        grid.innerHTML = data.map(p => `
+            <div class="member-card">
+                <div class="m-av av-1">${p.full_name.substring(0,2).toUpperCase()}</div>
+                <div class="m-info">
+                    <div class="m-name">${p.full_name}</div>
+                    <div class="m-elo">ELO ${p.elo}</div>
+                </div>
+                <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}'})">Défier</button>
+            </div>
+        `).join('');
+    }
+}
+
+// 2. Ouvrir la modale de cadence
+function defyMember(oppObj) {
+    modalOpp = oppObj; 
+    openModal(oppObj);
+}
+
+// 3. Envoyer le défi (confirmChallenge)
+async function confirmChallenge() {
+    closeModal();
+    showToast(`⏳ Défi envoyé à ${modalOpp.name}...`);
+
+    const { data, error } = await sb.from('games').insert([{
+        white_player_id: me.id,
+        black_player_id: modalOpp.id,
+        cadence: selCad.t,
+        status: 'pending'
+    }]).select().single();
+
+    if (!error) {
+        current_game_id = data.id;
+        // On ne passe pas encore à l'échiquier, on attend que l'autre accepte
+    }
+}
+
+// 4. Écouter le Realtime (Défis + Coups)
+function listenToGames() {
+    sb.channel('room_echecs')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, payload => {
-        const newGame = payload.new;
-        // Si je suis le joueur défié (Noir)
-        if (newGame.black_player_id === me.id && newGame.status === 'pending') {
-            showToast("⚔️ Nouveau défi reçu !");
-            if(confirm(`⚔️ ${newGame.cadence} : Accepter le défi ?`)) {
-                acceptChallenge(newGame.id);
+        const gameReq = payload.new;
+        if (gameReq.black_player_id === me.id && gameReq.status === 'pending') {
+            if (confirm(`⚔️ Défi reçu de ${gameReq.white_player_id === me.id ? 'Toi' : 'un membre'} ! Accepter ?`)) {
+                acceptChallenge(gameReq.id);
             }
         }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, payload => {
-        const updatedGame = payload.new;
-        if (updatedGame.id === current_game_id) {
-            // Si l'adversaire a joué un coup
-            if (updatedGame.last_move_by !== me.id) {
-                game.move(updatedGame.last_move);
-                board.position(game.fen());
-                updateStatus();
-                updateHistory();
-            }
+        const g = payload.new;
+        
+        // A. Si mon défi est accepté par l'autre
+        if (g.white_player_id === me.id && g.status === 'in_progress' && current_game_id === g.id) {
+            startLiveGame(g.id, 'white');
+        }
+        
+        // B. Si un coup est joué dans ma partie en cours
+        if (g.id === current_game_id && g.last_move_by !== me.id) {
+            game.move(g.last_move);
+            board.position(game.fen());
+            updateStatus();
+            updateHistory();
         }
     })
     .subscribe();
 }
 
-async function acceptChallenge(gameId) {
-    current_game_id = gameId;
-    await sb.from('games').update({ status: 'in_progress' }).eq('id', gameId);
-    
-    goTo('game');
-    
-    // Si je suis le joueur Noir (celui qui accepte), je retourne le plateau
-    setTimeout(() => {
-        if(board) board.orientation('black');
-    }, 500);
+async function acceptChallenge(id) {
+    current_game_id = id;
+    await sb.from('games').update({ status: 'in_progress' }).eq('id', id);
+    startLiveGame(id, 'black');
+}
+
+function startLiveGame(gameId, color) {
+    document.getElementById('game-lobby').classList.add('hidden');
+    document.getElementById('game-board-area').classList.remove('hidden');
+    initBoard();
+    board.orientation(color);
+    showToast("La partie commence !");
+}
+
+function quitGame() {
+    document.getElementById('game-lobby').classList.remove('hidden');
+    document.getElementById('game-board-area').classList.add('hidden');
+    current_game_id = null;
 }
 /* ═══ REALTIME CHAT ═══ */
 function listenToChatRealtime() {
@@ -747,19 +815,14 @@ async function loadMembers() {
 }
 
 // Et modifie defyMember pour qu'il reçoive l'objet
-function defyMember(targetUser) {
-    openModal(targetUser);
-}
-  function enterApp(profile) {
+function enterApp(profile) {
   const init = profile.full_name.substring(0, 2).toUpperCase();
   me = { id: profile.id, name: profile.full_name, init: init, isAdmin: profile.is_admin };
   
-  // Mise à jour de la barre latérale
   document.getElementById('sb-name').textContent = profile.full_name;
   document.getElementById('sb-avatar').textContent = init;
   document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
   
-  // Affichage du panneau Admin si l'utilisateur l'est
   if (profile.is_admin) {
     document.getElementById('nav-lbl-admin').style.display = 'block';
     document.getElementById('nav-admin').style.display = 'flex';
@@ -770,9 +833,10 @@ function defyMember(targetUser) {
   showAuth('app');
   initCadGrid();
   renderTopics();
-  loadMembers(); // <--- AJOUTÉ ICI : Charge la liste des joueurs
+  loadMembers(); 
+  loadLobby(); // <--- AJOUTE CETTE LIGNE pour voir les gens dans l'onglet JOUER
   listenToChatRealtime();
-    listenToGames();
+  listenToGames(); 
   goTo('home');
 }
 async function doLogin() {
@@ -826,23 +890,7 @@ async function doRegister() {
     showAuth('login');
   }
 }
-  
-function listenToChatRealtime() {
-  // Charger les messages existants
-  fetchMessages(); 
 
-  // Écouter les nouveaux messages en temps réel
-  sb
-    .channel('public:chat_messages')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
-      const msg = payload.new;
-      if (msg.channel === curCh) { // FIX: J'ai retiré le 'a' qui traînait ici
-        CHAT[curCh].push({ author: "Membre", init: "?", col: 'av-1', t: msg.content, time: "Maintenant" });
-        renderChat();
-      }
-    })
-    .subscribe();
-}
 function doLogout(){showAuth('login');board=null;game=null;boardInited=false;}
 
 /* ═══ NAV ═══ */
@@ -889,28 +937,6 @@ function openModal(opp){
   document.getElementById('modal-ov').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modal-ov').classList.add('hidden');}
-async function confirmChallenge() {
-    const name = modalOpp ? modalOpp.name : '—';
-    closeModal();
-
-    // Créer la partie dans Supabase
-    const { data, error } = await sb.from('games').insert([{
-        white_player_id: me.id,
-        black_player_id: modalOpp.id, // On doit s'assurer d'avoir l'ID de l'opposant
-        cadence: selCad.t,
-        status: 'pending',
-        pgn: ''
-    }]).select().single();
-
-    if (error) {
-        showToast("❌ Erreur lors de l'envoi du défi.");
-    } else {
-        showToast(`⚔️ Défi envoyé à ${name} !`);
-        // On attend que l'autre accepte ou on fonce sur la page de jeu
-        current_game_id = data.id; 
-        goTo('game');
-    }
-}
 
 /* ═══ MEMBRES — défi depuis la grille ═══ */
 function defyMember(name,col){openModal({name,col,elo:null});}
