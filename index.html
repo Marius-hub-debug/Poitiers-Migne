@@ -616,6 +616,33 @@ async function rejectUser(userId) {
   showToast('❌ Joueur refusé.');
   loadPendingUsers();
 }
+  function listenToGames() {
+    sb.channel('db_games')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, payload => {
+        const newGame = payload.new;
+        // Si je suis le joueur noir et que la partie est nouvelle
+        if (newGame.black_player_id === me.id && newGame.status === 'pending') {
+            if(confirm("⚔️ Tu as reçu un défi ! Accepter ?")) {
+                acceptChallenge(newGame.id);
+            }
+        }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, payload => {
+        // C'est ici qu'on reçoit le coup de l'adversaire !
+        if (payload.new.id === current_game_id && payload.new.last_move_by !== me.id) {
+            game.move(payload.new.last_move);
+            board.position(game.fen());
+            updateStatus();
+        }
+    })
+    .subscribe();
+}
+
+async function acceptChallenge(gameId) {
+    current_game_id = gameId;
+    await sb.from('games').update({ status: 'in_progress' }).eq('id', gameId);
+    goTo('game');
+}
 
 /* ═══ REALTIME CHAT ═══ */
 function listenToChatRealtime() {
@@ -732,7 +759,7 @@ function pseudoToEmail(pseudo) {
   goTo('home');
 }
 async function doLogin() {
-  const pseudo = document.getElementById('reg-pseudo').value.trim();
+const pseudo = document.getElementById('login-pseudo').value.trim();
   const pw = document.getElementById('login-pw').value;
 
   if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
@@ -843,11 +870,27 @@ function openModal(opp){
   document.getElementById('modal-ov').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modal-ov').classList.add('hidden');}
-function confirmChallenge(){
-  const name=modalOpp?modalOpp.name:'—';
-  closeModal();goTo('game');
-  document.getElementById('game-vs').textContent=`vs ${name} · ${selCad.nm} ${selCad.sub}`;
-  setTimeout(()=>showToast(`⚔️ Défi envoyé à ${name} — ${selCad.t} (sb à venir)`),300);
+async function confirmChallenge() {
+    const name = modalOpp ? modalOpp.name : '—';
+    closeModal();
+
+    // Créer la partie dans Supabase
+    const { data, error } = await sb.from('games').insert([{
+        white_player_id: me.id,
+        black_player_id: modalOpp.id, // On doit s'assurer d'avoir l'ID de l'opposant
+        cadence: selCad.t,
+        status: 'pending',
+        pgn: ''
+    }]).select().single();
+
+    if (error) {
+        showToast("❌ Erreur lors de l'envoi du défi.");
+    } else {
+        showToast(`⚔️ Défi envoyé à ${name} !`);
+        // On attend que l'autre accepte ou on fonce sur la page de jeu
+        current_game_id = data.id; 
+        goTo('game');
+    }
 }
 
 /* ═══ MEMBRES — défi depuis la grille ═══ */
@@ -1003,11 +1046,22 @@ function addHL(sq){
   removeHL();
   game.moves({square:sq,verbose:true}).forEach(mv=>$('#board .square-'+mv.to).addClass('highlight'));
 }
-function onDrop(src,tgt){
-  removeHL();
-  const mv=game.move({from:src,to:tgt,promotion:'q'});
-  if(!mv)return'snapback';
-  board.position(game.fen());updateStatus();updateHistory();
+async function onDrop(src, tgt) {
+    removeHL();
+    const move = game.move({ from: src, to: tgt, promotion: 'q' });
+    if (!move) return 'snapback';
+
+    // Envoyer le coup à Supabase
+    if (current_game_id) {
+        await sb.from('games').update({ 
+            pgn: game.pgn(),
+            last_move: move.san,
+            last_move_by: me.id 
+        }).eq('id', current_game_id);
+    }
+
+    updateStatus();
+    updateHistory();
 }
 function undoMove(){game.undo();board.position(game.fen());updateStatus();updateHistory();}
 function resetGame(){game=new Chess();board.start();updateStatus();updateHistory();}
