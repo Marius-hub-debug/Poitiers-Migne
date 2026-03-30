@@ -693,8 +693,7 @@ let current_game_id = null;
 let myColor = 'w'; 
 let modalOpp = null;
 let curCh = 'general';
-const CHAT = { general: [] };
-const PAGES = ['home','membres','random','game','chat','admin'];
+const PAGES = ['home','membres','random','game','chat','admin','stats','recentes','forum'];
 
 let game = null, board = null, boardInited = false;
 let whiteTime = 0, blackTime = 0, clockInterval = null;
@@ -706,10 +705,23 @@ const CADENCES = [
 ];
 let selCad = CADENCES[1];
 
-// --- INITIALISATION & NAV ---
+// --- INITIALISATION AU CHARGEMENT ---
+window.onload = async () => {
+    // Vérifier si une session existe déjà
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) enterApp(profile);
+    }
+};
+
+// --- NAVIGATION ---
 function pseudoToEmail(pseudo) { return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local'; }
-function showToast(msg) { const t = document.getElementById('toast'); if(t){ t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3200); }}
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+function showToast(msg) { 
+    const t = document.getElementById('toast'); 
+    if(t){ t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3200); }
+}
+function esc(s) { return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;') : ''; }
 
 function goTo(id) {
   PAGES.forEach(s => {
@@ -726,25 +738,12 @@ function goTo(id) {
 }
 
 function showAuth(p) {
-  ['page-login', 'page-register', 'app'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.classList.add('hidden');
-  });
-  const target = document.getElementById('page-' + p);
-  if(target) target.classList.remove('hidden');
-  if(p === 'app') document.getElementById('app').classList.remove('hidden');
-}
-    function openModal(opp) {
-  if (!opp || !opp.name) return;
-  modalOpp = opp;
-  const name = String(opp.name);
-  const init = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('page-login').classList.add('hidden');
+  document.getElementById('page-register').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
   
-  const av = document.getElementById('modal-av');
-  av.textContent = init;
-  document.getElementById('modal-nm').textContent = name;
-  document.getElementById('modal-elo').textContent = opp.elo ? `ELO ${opp.elo}` : 'Prêt pour le duel';
-  document.getElementById('modal-ov').classList.remove('hidden');
+  const target = document.getElementById('page-' + p) || document.getElementById(p);
+  if(target) target.classList.remove('hidden');
 }
 
 // --- AUTHENTIFICATION ---
@@ -755,76 +754,98 @@ async function doLogin() {
   
   const { data, error } = await sb.auth.signInWithPassword({ email: pseudoToEmail(pseudo), password: pw });
   
-  if (error) showToast('❌ Identifiants incorrects.');
-  else {
-    const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
-    if (profile.account_status === 'pending') {
-      await sb.auth.signOut();
-      showToast('⏳ Attente de validation admin.');
-    } else {
-      enterApp(profile);
-    }
+  if (error) {
+      showToast('❌ Identifiants incorrects.');
+  } else {
+      const { data: profile, error: pError } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
+      if (profile) {
+          if (profile.account_status === 'pending') {
+            await sb.auth.signOut();
+            showToast('⏳ Attente de validation admin.');
+          } else {
+            enterApp(profile);
+          }
+      } else {
+          showToast('❌ Profil introuvable.');
+      }
   }
 }
 
 async function doRegister() {
   const pseudo = document.getElementById('reg-pseudo').value.trim();
+  const name = document.getElementById('reg-name').value.trim();
   const pw = document.getElementById('reg-pw').value;
   if (!pseudo || pw.length < 8) { showToast('⚠️ Pseudo requis et Mdp de 8 caractères.'); return; }
   
-  const { error } = await sb.auth.signUp({ 
+  const { data, error } = await sb.auth.signUp({ 
     email: pseudoToEmail(pseudo), 
     password: pw, 
-    options: { data: { full_name: pseudo } } 
+    options: { data: { full_name: name || pseudo } } 
   });
   
   if (error) showToast('❌ ' + error.message);
-  else { showToast('✅ Créé ! Attente validation.'); showAuth('login'); }
+  else { 
+      showToast('✅ Créé ! Attente validation.'); 
+      showAuth('login'); 
+  }
 }
 
 async function enterApp(profile) {
-  me = { id: profile.id, name: profile.full_name, init: profile.full_name.substring(0, 2).toUpperCase(), elo: profile.elo, isAdmin: profile.is_admin };
-  
-  // Update statut en ligne
-  await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
+  try {
+      // Sécurité si les données sont incomplètes
+      const fullName = profile.full_name || "Joueur";
+      me = { 
+          id: profile.id, 
+          name: fullName, 
+          init: fullName.substring(0, 2).toUpperCase(), 
+          elo: profile.elo || 1200, 
+          isAdmin: profile.is_admin 
+      };
+      
+      // UI Update immédiat
+      showAuth('app');
+      document.getElementById('sb-name').textContent = me.name;
+      document.getElementById('sb-avatar').textContent = me.init;
+      document.getElementById('welcome-name').textContent = me.name.split(' ')[0];
+      
+      if (profile.is_admin) {
+        document.getElementById('nav-lbl-admin').style.display = 'block';
+        document.getElementById('nav-admin').style.display = 'flex';
+        loadPendingUsers();
+      }
 
-  document.getElementById('sb-name').textContent = me.name;
-  document.getElementById('sb-avatar').textContent = me.init;
-  document.getElementById('welcome-name').textContent = me.name.split(' ')[0];
-  
-  if (profile.is_admin) {
-    document.getElementById('nav-lbl-admin').style.display = 'block';
-    document.getElementById('nav-admin').style.display = 'flex';
-    loadPendingUsers();
+      // Update statut en ligne
+      await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
+
+      // Chargement data
+      initCadGrid();
+      loadMembers();
+      loadLobby();
+      listenToRealtime();
+      updateOnlineCount();
+      goTo('home');
+
+  } catch (e) {
+      console.error(e);
+      showToast("Erreur lors du chargement du profil.");
   }
-  
-  showAuth('app');
-  initCadGrid();
-  loadMembers();
-  loadLobby();
-  listenToRealtime(); // <── UNE SEULE FONCTION POUR TOUT LE REALTIME
-  updateOnlineCount();
-  goTo('home');
 }
 
 // --- REALTIME ---
 function listenToRealtime() {
   fetchMessages();
   
-  // Update membres & en ligne
   sb.channel('profiles_track').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
     updateOnlineCount(); loadMembers(); loadLobby();
   }).subscribe();
 
-  // Chat
   sb.channel('chat_track').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => {
     fetchMessages();
   }).subscribe();
 
-  // Défis & Jeu
   sb.channel('games_track').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, p => {
     if (p.new.black_player_id === me.id && p.new.status === 'pending') {
-      if (confirm(`⚔️ Duel reçu (Cadence ${p.new.cadence}) ! Accepter ?`)) acceptChallenge(p.new.id, p.new.cadence);
+      if (confirm(`⚔️ Duel reçu de la part d'un membre ! Accepter ?`)) acceptChallenge(p.new.id, p.new.cadence);
     }
   }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, p => {
     const g = p.new;
@@ -833,15 +854,18 @@ function listenToRealtime() {
         startLiveGame(g.id, me.id === g.white_player_id ? 'white' : 'black', g.cadence);
       }
       if (g.last_move_by && g.last_move_by !== me.id) {
-        game.move(g.last_move); board.position(game.fen()); updateClockUI();
+        game.move(g.last_move); 
+        board.position(game.fen()); 
+        updateClockUI();
       }
     }
   }).subscribe();
 }
 
-// --- LOGIQUE JEU & PENDULE ---
+// --- JEU ---
 function initBoard() {
-  if (boardInited) return; boardInited = true;
+  if (boardInited) return; 
+  boardInited = true;
   game = new Chess();
   board = Chessboard('board', {
     draggable: true, position: 'start',
@@ -878,20 +902,21 @@ function updateClockUI() {
   if(status) {
     status.innerHTML = `
       <div style="display:flex; justify-content:space-between; font-weight:bold">
-        <span style="color:${game.turn()==='w'?'var(--gold)':'inherit'}">Blancs: ${f(whiteTime)}</span>
-        <span style="color:${game.turn()==='b'?'var(--gold)':'inherit'}">Noirs: ${f(blackTime)}</span>
+        <span style="color:${game.turn()==='w'?'#efc900':'inherit'}">Blancs: ${f(whiteTime)}</span>
+        <span style="color:${game.turn()==='b'?'#efc900':'inherit'}">Noirs: ${f(blackTime)}</span>
       </div>`;
   }
 }
 
-// --- ACTIONS ---
+// --- CHARGEMENT DONNÉES ---
 async function loadMembers() {
   const { data } = await sb.from('profiles').select('*').eq('account_status', 'accepted').order('elo', { ascending: false });
-  if (data) {
-    document.getElementById('members-grid').innerHTML = data.map(p => `
+  const grid = document.getElementById('members-grid');
+  if (data && grid) {
+    grid.innerHTML = data.map(p => `
       <div class="member-card">
-        <div class="m-av">${p.full_name.substring(0,2).toUpperCase()} <div class="odot ${p.is_online ? 'on' : 'off'}"></div></div>
-        <div class="m-info"><div class="m-name">${p.full_name}</div><div class="m-elo">ELO ${p.elo}</div></div>
+        <div class="m-av">${(p.full_name || "??").substring(0,2).toUpperCase()} <div class="odot ${p.is_online ? 'on' : 'off'}"></div></div>
+        <div class="m-info"><div class="m-name">${esc(p.full_name)}</div><div class="m-elo">ELO ${p.elo || 1200}</div></div>
       </div>`).join('');
   }
 }
@@ -902,8 +927,8 @@ async function loadLobby() {
   if (data && grid) {
     grid.innerHTML = data.map(p => `
       <div class="member-card">
-        <div class="m-av">${p.full_name.substring(0,2).toUpperCase()}</div>
-        <div class="m-info"><div class="m-name">${p.full_name}</div><div class="m-elo">ELO ${p.elo}</div></div>
+        <div class="m-av">${(p.full_name || "??").substring(0,2).toUpperCase()}</div>
+        <div class="m-info"><div class="m-name">${esc(p.full_name)}</div><div class="m-elo">ELO ${p.elo || 1200}</div></div>
         <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}'})">Défier</button>
       </div>`).join('');
   }
@@ -915,10 +940,42 @@ async function updateOnlineCount() {
   if(badge) badge.textContent = count || 0;
 }
 
-function defyMember(opp) { modalOpp = opp; document.getElementById('modal-nm').textContent = opp.name; document.getElementById('modal-ov').classList.remove('hidden'); }
+// --- CHAT ---
+async function fetchMessages() {
+  const { data } = await sb.from('chat_messages').select('*').eq('channel', curCh).order('created_at', { ascending: true }).limit(50);
+  const el = document.getElementById('chat-msgs');
+  if (data && el) {
+    el.innerHTML = data.map(m => `
+      <div class="chat-msg ${m.author_id===me.id?'me':''}">
+        <div class="cm-text">${esc(m.content)}</div>
+      </div>`).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-inp');
+  if (!inp || !inp.value.trim()) return;
+  await sb.from('chat_messages').insert([{ channel: curCh, content: inp.value, author_id: me.id }]);
+  inp.value = '';
+}
+
+// --- AUTRES FONCTIONS ---
+function defyMember(opp) { 
+    modalOpp = opp; 
+    document.getElementById('modal-nm').textContent = opp.name; 
+    document.getElementById('modal-ov').classList.remove('hidden'); 
+}
 function closeModal() { document.getElementById('modal-ov').classList.add('hidden'); }
-function initCadGrid() { document.getElementById('cad-grid').innerHTML = CADENCES.map(c => `<div class="cad-btn ${c.id===selCad.id?'sel':''}" onclick="selCadence('${c.id}',this)"><div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div></div>`).join(''); }
-function selCadence(id,el) { selCad = CADENCES.find(c=>c.id===id); document.querySelectorAll('.cad-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+function initCadGrid() { 
+    const cg = document.getElementById('cad-grid');
+    if(cg) cg.innerHTML = CADENCES.map(c => `<div class="cad-btn ${c.id===selCad.id?'sel':''}" onclick="selCadence('${c.id}',this)"><div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div></div>`).join(''); 
+}
+function selCadence(id,el) { 
+    selCad = CADENCES.find(c=>c.id===id); 
+    document.querySelectorAll('.cad-btn').forEach(b=>b.classList.remove('sel')); 
+    el.classList.add('sel'); 
+}
 
 async function confirmChallenge() {
   closeModal();
@@ -936,36 +993,21 @@ function startLiveGame(id, color, cadence) {
   current_game_id = id; myColor = color.charAt(0);
   document.getElementById('game-lobby').classList.add('hidden');
   document.getElementById('game-board-area').classList.remove('hidden');
-  initBoard(); board.orientation(color);
+  initBoard(); 
+  board.orientation(color);
   startClocks(cadence);
 }
 
-async function fetchMessages() {
-  const { data } = await sb.from('chat_messages').select('*').eq('channel', curCh).order('created_at', { ascending: true }).limit(50);
-  if (data) {
-    const el = document.getElementById('chat-msgs');
-    el.innerHTML = data.map(m => `<div class="chat-msg ${m.author_id===me.id?'me':''}"><div class="cm-text">${esc(m.content)}</div></div>`).join('');
-    el.scrollTop = el.scrollHeight;
-  }
+async function doLogout() {
+    await sb.from('profiles').update({ is_online: false }).eq('id', me.id);
+    await sb.auth.signOut();
+    location.reload();
 }
 
-async function sendChat() {
-  const inp = document.getElementById('chat-inp');
-  if (!inp || !inp.value.trim()) return;
-  await sb.from('chat_messages').insert([{ channel: curCh, content: inp.value, author_id: me.id }]);
-  inp.value = '';
+function toggleNTF() {
+    const f = document.getElementById('new-topic-form');
+    f.style.display = f.style.display === 'block' ? 'none' : 'block';
 }
-
-function quitGame() { location.reload(); }
-
-async function loadPendingUsers() {
-  const { data } = await sb.from('profiles').select('*').eq('account_status', 'pending');
-  const list = document.getElementById('pending-users-list');
-  if (list && data) {
-    list.innerHTML = data.map(p => `<div class="member-card"><span>${p.full_name}</span><button class="btn-defy" onclick="valider('${p.id}')">✅</button></div>`).join('');
-  }
-}
-async function valider(id) { await sb.from('profiles').update({ account_status: 'accepted' }).eq('id', id); loadPendingUsers(); }
 </script>
 </body>
 </html>
