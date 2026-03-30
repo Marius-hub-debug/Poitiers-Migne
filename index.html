@@ -694,7 +694,7 @@ let myColor = 'w';
 let modalOpp = null;
 let curCh = 'general';
 const CHAT = { general: [] };
-const PAGES = ['home','membres','stats','recentes','random','game','chat','admin'];
+const PAGES = ['home','membres','random','game','chat','admin'];
 
 let game = null, board = null, boardInited = false;
 let whiteTime = 0, blackTime = 0, clockInterval = null;
@@ -734,6 +734,18 @@ function showAuth(p) {
   if(target) target.classList.remove('hidden');
   if(p === 'app') document.getElementById('app').classList.remove('hidden');
 }
+    function openModal(opp) {
+  if (!opp || !opp.name) return;
+  modalOpp = opp;
+  const name = String(opp.name);
+  const init = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  
+  const av = document.getElementById('modal-av');
+  av.textContent = init;
+  document.getElementById('modal-nm').textContent = name;
+  document.getElementById('modal-elo').textContent = opp.elo ? `ELO ${opp.elo}` : 'Prêt pour le duel';
+  document.getElementById('modal-ov').classList.remove('hidden');
+}
 
 // --- AUTHENTIFICATION ---
 async function doLogin() {
@@ -771,16 +783,15 @@ async function doRegister() {
 }
 
 async function enterApp(profile) {
-  me = profile;
+  me = { id: profile.id, name: profile.full_name, init: profile.full_name.substring(0, 2).toUpperCase(), elo: profile.elo, isAdmin: profile.is_admin };
+  
+  // Update statut en ligne
   await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
-  
-  document.getElementById('sb-name').textContent = profile.full_name;
-  document.getElementById('sb-avatar').textContent = profile.full_name.substring(0,2).toUpperCase();
-  document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
-  
-  const eloDisp = document.getElementById('sb-elo');
-  if(eloDisp) eloDisp.textContent = "ELO " + profile.elo;
 
+  document.getElementById('sb-name').textContent = me.name;
+  document.getElementById('sb-avatar').textContent = me.init;
+  document.getElementById('welcome-name').textContent = me.name.split(' ')[0];
+  
   if (profile.is_admin) {
     document.getElementById('nav-lbl-admin').style.display = 'block';
     document.getElementById('nav-admin').style.display = 'flex';
@@ -791,7 +802,7 @@ async function enterApp(profile) {
   initCadGrid();
   loadMembers();
   loadLobby();
-  listenToRealtime();
+  listenToRealtime(); // <── UNE SEULE FONCTION POUR TOUT LE REALTIME
   updateOnlineCount();
   goTo('home');
 }
