@@ -684,6 +684,7 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
   <script>
 // --- CONFIGURATION SUPABASE ---
+// --- CONFIGURATION SUPABASE ---
 const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ZXVlc3BtZ2J4Z3hjYWloZXJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDM5MjUsImV4cCI6MjA5MDM3OTkyNX0.h0EjR6sCeqapXmZOdZSaF-W1EsFSqYk5mK0B42BYV4o';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -691,45 +692,43 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // --- VARIABLES GLOBALES ---
 let me = { id: null, name: '', init: '', elo: 1200 };
 let current_game_id = null;
-let myColor = 'w'; // 'w' ou 'b'
+let myColor = 'w'; 
 let modalOpp = null;
 let curCh = 'general';
 const CHAT = { general: [], resultats: [], analyse: [], 'hors-sujet': [] };
-let TOPICS = [];
-let curTopic = null;
+const PAGES = ['home','membres','stats','recentes','random', 'game','chat','admin'];
 
 let game = null, board = null, boardInited = false;
 let whiteTime = 0, blackTime = 0, clockInterval = null;
 
-const PAGES = ['home','membres','stats','recentes','random','game','chat','forum', 'admin'];
 const CADENCES = [
-  {id:'b1', nm:'Bullet', sub:'1 min', t:'1+0'}, {id:'b2', nm:'Bullet', sub:'2+1', t:'2+1'},
-  {id:'bl3', nm:'Blitz', sub:'3 min', t:'3+0'}, {id:'bl5', nm:'Blitz', sub:'5+3', t:'5+3'},
+  {id:'b1', nm:'Bullet', sub:'1 min', t:'1+0'}, 
+  {id:'bl3', nm:'Blitz', sub:'3 min', t:'3+0'}, 
   {id:'r10', nm:'Rapide', sub:'10 min', t:'10+0'}
 ];
-let selCad = CADENCES[2];
+let selCad = CADENCES[1];
 
-// --- UTILITAIRES ---
+// --- INITIALISATION ---
 function pseudoToEmail(pseudo) { return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local'; }
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3200); }
-function showAuth(p) { ['page-login','page-register','app'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('page-'+p).classList.remove('hidden'); }
+function showToast(msg) { const t = document.getElementById('toast'); if(t){ t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3200); }}
+function showAuth(p) { ['page-login','page-register','app'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); }); const target = document.getElementById('page-' + p); if(target) target.classList.remove('hidden'); if(p==='app') document.getElementById('app').classList.remove('hidden'); }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
+
 function goTo(id) {
-  PAGES.forEach(s => { document.getElementById('section-'+s).classList.remove('active'); const n = document.getElementById('nav-'+s); if(n) n.classList.remove('active'); });
-  document.getElementById('section-'+id).classList.add('active');
-  const n = document.getElementById('nav-'+id); if(n) n.classList.add('active');
+  PAGES.forEach(s => { 
+    const sec = document.getElementById('section-'+s);
+    if(sec) sec.classList.remove('active');
+    const nav = document.getElementById('nav-'+s); 
+    if(nav) nav.classList.remove('active'); 
+  });
+  const targetSec = document.getElementById('section-'+id);
+  if(targetSec) targetSec.classList.add('active');
+  const targetNav = document.getElementById('nav-'+id);
+  if(targetNav) targetNav.classList.add('active');
   if(id === 'game') initBoard();
 }
 
 // --- AUTHENTIFICATION ---
-async function doRegister() {
-  const pseudo = document.getElementById('reg-pseudo').value.trim();
-  const pw = document.getElementById('reg-pw').value;
-  if (!pseudo || pw.length < 8) { showToast('⚠️ Remplissez tout (Mdp: 8 min).'); return; }
-  const { error } = await sb.auth.signUp({ email: pseudoToEmail(pseudo), password: pw, options: { data: { full_name: pseudo } } });
-  if (error) showToast('❌ ' + error.message); else { showToast('✅ Créé ! Attente validation admin.'); showAuth('login'); }
-}
-
 async function doLogin() {
   const pseudo = document.getElementById('login-pseudo').value.trim();
   const pw = document.getElementById('login-pw').value;
@@ -738,19 +737,24 @@ async function doLogin() {
   if (error) showToast('❌ Identifiants incorrects.');
   else {
     const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
-    if (profile.account_status === 'pending') { await sb.auth.signOut(); showToast('⏳ Attente de validation admin.'); }
-    else if (profile.account_status === 'rejected') { await sb.auth.signOut(); showToast('❌ Accès refusé.'); }
+    if (profile.account_status === 'pending') { await sb.auth.signOut(); showToast('⏳ Attente validation admin.'); }
     else enterApp(profile);
   }
 }
 
+async function doRegister() {
+  const pseudo = document.getElementById('reg-pseudo').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  if (!pseudo || pw.length < 8) { showToast('⚠️ Mdp: 8 caractères min.'); return; }
+  const { error } = await sb.auth.signUp({ email: pseudoToEmail(pseudo), password: pw, options: { data: { full_name: pseudo } } });
+  if (error) showToast('❌ ' + error.message); else { showToast('✅ Créé ! Attente validation.'); showAuth('login'); }
+}
+
 async function enterApp(profile) {
   me = profile;
-  me.init = profile.full_name.substring(0,2).toUpperCase();
-  await sb.from('profiles').update({ is_online: true }).eq('id', me.id); // Connexion
-
+  await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
   document.getElementById('sb-name').textContent = profile.full_name;
-  document.getElementById('sb-avatar').textContent = me.init;
+  document.getElementById('sb-avatar').textContent = profile.full_name.substring(0,2).toUpperCase();
   document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
   
   if (profile.is_admin) {
@@ -763,8 +767,6 @@ async function enterApp(profile) {
   initCadGrid();
   loadMembers();
   loadLobby();
-  loadStatsAndGames();
-  loadForum();
   listenToRealtime();
   updateOnlineCount();
   goTo('home');
@@ -776,37 +778,11 @@ async function doLogout() {
   location.reload();
 }
 
-// --- CHARGEMENT DES DONNÉES (STATS, MEMBRES) ---
+// --- REALTIME & UPDATES ---
 async function updateOnlineCount() {
   const { count } = await sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_online', true);
-  document.getElementById('online-badge').textContent = count || 1;
-}
-
-async function loadStatsAndGames() {
-  // Stats
-  const els = document.querySelectorAll('#section-stats .stat-val');
-  if(els.length >= 5) {
-    els[0].textContent = me.elo; els[1].textContent = me.games_played;
-    els[2].textContent = me.wins; els[3].textContent = me.draws; els[4].textContent = me.losses;
-  }
-  const hEls = document.querySelectorAll('#section-home .stat-val');
-  if(hEls.length >= 3) {
-    hEls[0].textContent = me.elo; hEls[1].textContent = me.wins;
-    hEls[2].textContent = me.games_played > 0 ? Math.round((me.wins/me.games_played)*100)+'%' : '0%';
-  }
-  
-  // Parties récentes
-  const { data } = await sb.from('games').select('*').or(`white_player_id.eq.${me.id},black_player_id.eq.${me.id}`).not('result', 'is', null).order('created_at', { ascending: false }).limit(8);
-  const gl = document.getElementById('games-list');
-  if(data && data.length) {
-    gl.innerHTML = data.map(g => {
-      const isW = g.white_player_id === me.id;
-      const res = g.result === '1-0' ? (isW?'win':'loss') : (g.result==='0-1' ? (!isW?'win':'loss') : 'draw');
-      return `<div class="game-row"><div class="res-badge ${res}">${res[0].toUpperCase()}</div><div class="game-opp">Cadence: ${g.cadence}</div></div>`;
-    }).join('');
-  } else {
-    gl.innerHTML = '<div class="empty-state"><p>Aucune partie terminée.</p></div>';
-  }
+  const badge = document.getElementById('online-badge');
+  if(badge) badge.textContent = count || 0;
 }
 
 async function loadMembers() {
@@ -824,102 +800,102 @@ async function loadMembers() {
 async function loadLobby() {
   const { data } = await sb.from('profiles').select('*').eq('is_online', true).neq('id', me.id);
   const grid = document.getElementById('lobby-members-grid');
-  if (data && data.length > 0) {
+  if (data && data.length) {
     grid.innerHTML = data.map(p => `
       <div class="member-card">
         <div class="m-av">${p.full_name.substring(0,2).toUpperCase()}</div>
         <div class="m-info"><div class="m-name">${p.full_name}</div><div class="m-elo">ELO ${p.elo}</div></div>
-        <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}'})">Défier</button>
+        <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}'})">Duel</button>
       </div>`).join('');
-  } else { grid.innerHTML = '<p style="color:var(--g500)">Personne en ligne pour le moment...</p>'; }
+  } else if(grid) { grid.innerHTML = '<p style="padding:20px; color:var(--g500)">Aucun adversaire en ligne...</p>'; }
 }
 
-function filterMembers(q) {
-  document.querySelectorAll('#members-grid .member-card').forEach(c => {
-    c.style.display = c.querySelector('.m-name').textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-  });
-}
+function listenToRealtime() {
+  fetchMessages();
+  
+  // 1. Compteur de membres et statut en ligne
+  sb.channel('profiles_realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+    updateOnlineCount(); loadLobby(); loadMembers();
+  }).subscribe();
 
-// --- DÉFIS ET MODALES ---
-function initCadGrid() {
-  document.getElementById('cad-grid').innerHTML = CADENCES.map(c => `
-    <div class="cad-btn${c.id === selCad.id ? ' sel' : ''}" onclick="selCadence('${c.id}',this)">
-      <div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div>
-    </div>`).join('');
-}
-function selCadence(id, el) {
-  selCad = CADENCES.find(c => c.id === id);
-  document.querySelectorAll('.cad-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel');
-}
-function defyMember(opp) { modalOpp = opp; document.getElementById('modal-nm').textContent = opp.name; document.getElementById('modal-av').textContent = opp.name.substring(0,2).toUpperCase(); document.getElementById('modal-ov').classList.remove('hidden'); }
-function closeModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+  // 2. Chat
+  sb.channel('chat_realtime').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => {
+    if (p.new.channel === curCh) { fetchMessages(); }
+  }).subscribe();
 
-// --- LOGIQUE DE JEU & PENDULES ---
-function parseCadence(cad) { const parts = cad.split('+'); return parseInt(parts[0]) * 60; }
-function startClocks(cad) {
-  whiteTime = blackTime = parseCadence(cad);
-  clearInterval(clockInterval);
-  clockInterval = setInterval(() => {
-    if(!game || game.game_over()) { clearInterval(clockInterval); return; }
-    if(game.turn() === 'w') whiteTime--; else blackTime--;
-    updateClockUI();
-    if(whiteTime <= 0 || blackTime <= 0) {
-      clearInterval(clockInterval); showToast("⏰ Temps écoulé !"); 
-      // Logique de fin de partie à implémenter (update games set result)
+  // 3. Défis et Mouvements
+  sb.channel('games_realtime').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, p => {
+    if (p.new.black_player_id === me.id && p.new.status === 'pending') {
+      if (confirm(`⚔️ Défi reçu ! Cadence : ${p.new.cadence}. Accepter ?`)) acceptChallenge(p.new.id, p.new.cadence);
     }
-  }, 1000);
-  updateClockUI();
+  }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, p => {
+    const g = p.new;
+    if (g.id === current_game_id) {
+      if (g.status === 'in_progress' && document.getElementById('game-board-area').classList.contains('hidden')) {
+        startLiveGame(g.id, me.id === g.white_player_id ? 'white' : 'black', g.cadence);
+      }
+      if (g.last_move_by && g.last_move_by !== me.id) {
+        game.move(g.last_move); board.position(game.fen()); updateClockUI(); updateHistory();
+      }
+    }
+  }).subscribe();
 }
 
-function updateClockUI() {
-  const format = (t) => `${Math.floor(t/60)}:${(t%60).toString().padStart(2, '0')}`;
-  document.getElementById('status-display').innerHTML = `
-    <div style="display:flex; justify-content:space-between; font-size:15px; margin-bottom:5px;">
-      <span style="color:${game.turn()==='w'?'var(--gold)':'var(--dark)'}">Blancs: <b>${format(whiteTime)}</b></span>
-      <span style="color:${game.turn()==='b'?'var(--gold)':'var(--dark)'}">Noirs: <b>${format(blackTime)}</b></span>
-    </div>
-    <div style="font-size:12px; color:var(--g500)">${game.in_check() ? '⚠️ ÉCHEC !' : (game.turn()==='w'?'Trait aux Blancs':'Trait aux Noirs')}</div>
-  `;
-}
-
+// --- JEU & PENDULE ---
 function initBoard() {
   if (boardInited) return; boardInited = true;
   game = new Chess();
   board = Chessboard('board', {
-    draggable: true, position: 'start', pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-    onDragStart: function(source, piece) {
-      // TRICHE IMPOSSIBLE : Vérifie si le jeu est fini, si c'est la bonne couleur, et si c'est le tour du joueur
+    draggable: true, position: 'start',
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+    onDragStart: (source, piece) => {
       if (game.game_over()) return false;
-      if (piece.charAt(0) !== myColor) return false; // Ne peut pas toucher les pièces adverses
-      if (game.turn() !== myColor) return false;     // Ne peut pas jouer 2 fois
+      if (piece.charAt(0) !== myColor) return false; // BLOQUE LES PIÈCES ADVERSES
+      if (game.turn() !== myColor) return false;     // BLOQUE LE COUP SI PAS TON TOUR
     },
     onDrop: async (src, tgt) => {
-      $('#board .square-55d63').removeClass('highlight');
       const move = game.move({ from: src, to: tgt, promotion: 'q' });
       if (!move) return 'snapback';
-      
-      if (current_game_id) await sb.from('games').update({ pgn: game.pgn(), last_move: move.san, last_move_by: me.id }).eq('id', current_game_id);
-      updateHistory(); updateClockUI();
+      updateClockUI(); updateHistory();
+      if (current_game_id) await sb.from('games').update({ last_move: move.san, last_move_by: me.id, pgn: game.pgn() }).eq('id', current_game_id);
     },
-    onMouseoverSquare: sq => {
-      $('#board .square-55d63').removeClass('highlight');
-      if(game.turn() === myColor) game.moves({ square: sq, verbose: true }).forEach(mv => $('#board .square-' + mv.to).addClass('highlight'));
-    },
-    onMouseoutSquare: () => $('#board .square-55d63').removeClass('highlight'),
-    onSnapEnd: () => board.position(game.fen()),
+    onSnapEnd: () => board.position(game.fen())
   });
 }
 
-function updateHistory() {
-  const m = game.history(); let h = '';
-  for (let i=0; i<m.length; i+=2) h += `<span style="color:var(--g400);margin-right:4px">${Math.floor(i/2)+1}.</span> <b>${m[i]}</b> ${m[i+1] || ''}<br>`;
-  const el = document.getElementById('history-display'); el.innerHTML = h; el.scrollTop = el.scrollHeight;
+function startClocks(cad) {
+  const base = parseInt(cad.split('+')[0]) * 60;
+  whiteTime = blackTime = base;
+  if(clockInterval) clearInterval(clockInterval);
+  clockInterval = setInterval(() => {
+    if (game.turn() === 'w') whiteTime--; else blackTime--;
+    updateClockUI();
+    if(whiteTime <= 0 || blackTime <= 0) clearInterval(clockInterval);
+  }, 1000);
 }
 
+function updateClockUI() {
+  const f = (t) => `${Math.floor(t/60)}:${(t%60).toString().padStart(2,'0')}`;
+  const status = document.getElementById('status-display');
+  if(status) {
+    status.innerHTML = `
+      <div style="display:flex; justify-content:space-between; font-weight:bold">
+        <span style="color:${game.turn()==='w'?'var(--gold)':'inherit'}">Blancs: ${f(whiteTime)}</span>
+        <span style="color:${game.turn()==='b'?'var(--gold)':'inherit'}">Noirs: ${f(blackTime)}</span>
+      </div>`;
+  }
+}
+
+// --- LOGIQUE DÉFIS ---
+function defyMember(opp) { modalOpp = opp; document.getElementById('modal-nm').textContent = opp.name; document.getElementById('modal-ov').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+function initCadGrid() { document.getElementById('cad-grid').innerHTML = CADENCES.map(c => `<div class="cad-btn ${c.id===selCad.id?'sel':''}" onclick="selCadence('${c.id}',this)"><div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div></div>`).join(''); }
+function selCadence(id,el) { selCad = CADENCES.find(c=>c.id===id); document.querySelectorAll('.cad-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+
 async function confirmChallenge() {
-  closeModal(); showToast(`⏳ Défi envoyé à ${modalOpp.name}...`);
+  closeModal();
   const { data, error } = await sb.from('games').insert([{ white_player_id: me.id, black_player_id: modalOpp.id, cadence: selCad.t, status: 'pending' }]).select().single();
-  if (!error) current_game_id = data.id;
+  if(!error) { current_game_id = data.id; showToast("⚔️ Défi envoyé !"); }
 }
 
 async function acceptChallenge(id, cadence) {
@@ -928,116 +904,46 @@ async function acceptChallenge(id, cadence) {
   startLiveGame(id, 'black', cadence);
 }
 
-function startLiveGame(gameId, color, cadence) {
-  current_game_id = gameId; myColor = color.charAt(0); // 'w' ou 'b'
-  document.getElementById('game-lobby').classList.add('hidden'); document.getElementById('game-board-area').classList.remove('hidden');
-  goTo('game'); initBoard(); board.orientation(color === 'w' ? 'white' : 'black');
-  startClocks(cadence); showToast('⚔️ La partie commence !');
+function startLiveGame(id, color, cadence) {
+  current_game_id = id; myColor = color.charAt(0);
+  document.getElementById('game-lobby').classList.add('hidden');
+  document.getElementById('game-board-area').classList.remove('hidden');
+  initBoard(); board.orientation(color === 'white' ? 'white' : 'black');
+  startClocks(cadence);
 }
 
-function quitGame() { document.getElementById('game-lobby').classList.remove('hidden'); document.getElementById('game-board-area').classList.add('hidden'); current_game_id = null; clearInterval(clockInterval); game = new Chess(); board.start(); }
+function quitGame() { if(confirm("Quitter la partie ?")) location.reload(); }
 
-function findRandom() {
-  const sp = document.getElementById('rand-spinner'), cd = document.getElementById('matched-card');
-  cd.style.display = 'none'; sp.style.display = 'block';
-  setTimeout(() => {
-    sp.style.display = 'none'; matchedOpp = { id: me.id, name: 'Joueur Aléatoire', elo: '1200' };
-    document.getElementById('matched-name').textContent = matchedOpp.name;
-    document.getElementById('matched-elo').textContent = 'Matchmaking simulé'; cd.style.display = 'block';
-  }, 1500);
-}
-
-// --- REALTIME SYNC (TOUT CENTRALISÉ) ---
-function listenToRealtime() {
-  fetchMessages();
-  
-  // Ecoute du CHAT
-  sb.channel('chat_sys').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => {
-    if (p.new.channel === curCh) { CHAT[curCh].push({ author: "Membre", init: "?", t: p.new.content }); renderChat(); }
-  }).subscribe();
-
-  // Ecoute des JEUX
-  sb.channel('game_sys').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, p => {
-    if (p.new.black_player_id === me.id && p.new.status === 'pending') {
-      if (confirm(`⚔️ Défi reçu ! Cadence : ${p.new.cadence}. Accepter ?`)) acceptChallenge(p.new.id, p.new.cadence);
-    }
-  }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, p => {
-    const g = p.new;
-    // L'adversaire a accepté
-    if (g.white_player_id === me.id && g.status === 'in_progress' && current_game_id === g.id && !clockInterval) {
-      startLiveGame(g.id, 'white', g.cadence);
-    }
-    // L'adversaire a joué un coup
-    if (g.id === current_game_id && g.last_move_by && g.last_move_by !== me.id) {
-      game.move(g.last_move); board.position(game.fen()); updateClockUI(); updateHistory();
-    }
-  }).subscribe();
-
-  // Ecoute du FORUM
-  sb.channel('forum_sys').on('postgres_changes', { event: '*', schema: 'public', table: 'forum_topics' }, loadForum)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_replies' }, loadForum).subscribe();
-    
-  // Ecoute des PROFILS (Connexions/Déconnexions pour le compteur)
-  sb.channel('profiles_sys').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, () => {
-      updateOnlineCount(); loadLobby(); loadMembers();
-  }).subscribe();
-}
-
-// --- CHAT ---
-function switchCh(ch, el) { curCh = ch; document.querySelectorAll('.ch-item').forEach(c => c.classList.remove('active')); el.classList.add('active'); document.getElementById('chat-ch-title').textContent = '# ' + ch; fetchMessages(); }
+// --- CHAT & ADMIN ---
 async function fetchMessages() {
   const { data } = await sb.from('chat_messages').select('*, profiles(full_name)').eq('channel', curCh).order('created_at', { ascending: true }).limit(50);
-  if (data) { CHAT[curCh] = data.map(m => ({ author: m.profiles ? m.profiles.full_name : "Membre", init: "?", t: m.content })); renderChat(); }
+  if (data) {
+    const el = document.getElementById('chat-msgs');
+    el.innerHTML = data.map(m => `<div class="chat-msg ${m.author_id===me.id?'me':''}"><div class="cm-text">${esc(m.content)}</div></div>`).join('');
+    el.scrollTop = el.scrollHeight;
+  }
 }
-function renderChat() {
-  const el = document.getElementById('chat-msgs');
-  el.innerHTML = (CHAT[curCh] || []).map(m => `<div class="chat-msg ${m.author===me.name?'me':''}"><div class="cm-av av-1">${m.init}</div><div><div class="cm-name">${m.author}</div><div class="cm-text">${esc(m.t)}</div></div></div>`).join('');
-  el.scrollTop = el.scrollHeight;
-}
+
 async function sendChat() {
-  const inp = document.getElementById('chat-inp'); const text = inp.value.trim(); if (!text) return;
-  await sb.from('chat_messages').insert([{ channel: curCh, content: text, author_id: me.id }]);
+  const inp = document.getElementById('chat-inp');
+  if (!inp.value.trim()) return;
+  await sb.from('chat_messages').insert([{ channel: curCh, content: inp.value, author_id: me.id }]);
   inp.value = '';
 }
 
-// --- FORUM REALTIME ---
-async function loadForum() {
-  // Remplacé par une fausse db locale pour que ça marche si la table SQL n'existe pas encore chez toi
-  // Remplace ceci par `await sb.from('forum_topics').select...` quand ta table sera prête
-  renderTopics();
-}
-function renderTopics() {
-  document.getElementById('topics-list').innerHTML = [...TOPICS].reverse().map(t => `<div class="topic-row" onclick="openTopic(${t.id})"><div class="topic-icon">${t.icon}</div><div class="topic-info"><div class="topic-title">${esc(t.title)}</div><div class="topic-sub">${t.cat} · par ${t.author}</div></div><div class="topic-meta"><div class="topic-count">${t.replies.length} Rép.</div><div class="topic-date">${t.date}</div></div></div>`).join('');
-}
-function openTopic(id) {
-  curTopic = id; const t = TOPICS.find(x => x.id === id); if (!t) return;
-  document.getElementById('forum-list-view').style.display = 'none'; document.getElementById('new-topic-form').style.display = 'none'; document.getElementById('forum-detail').style.display = 'block';
-  document.getElementById('detail-title').textContent = t.title; document.getElementById('detail-posts').innerHTML = t.replies.map(r => `<div class="forum-post"><div class="fp-hd"><div class="fp-av av-1">${r.ainit}</div><div><div class="fp-name">${r.author}</div></div></div><div class="fp-body">${esc(r.body)}</div></div>`).join('');
-}
-function backToForum() { document.getElementById('forum-detail').style.display = 'none'; document.getElementById('forum-list-view').style.display = 'block'; curTopic = null; }
-function toggleNTF() { const f = document.getElementById('new-topic-form'); f.style.display = f.style.display === 'block' ? 'none' : 'block'; }
-
-function submitTopic() {
-  const title = document.getElementById('ntf-title').value.trim(), cat = document.getElementById('ntf-cat').value, body = document.getElementById('ntf-body').value.trim();
-  if (!title || !body) return showToast('⚠️ Remplissez tout.');
-  TOPICS.push({ id: Date.now(), icon: cat.split(' ')[0], title, cat: cat.substring(2), author: me.name, ainit: me.init, date: 'Maintenant', replies: [{ author: me.name, ainit: me.init, body }] });
-  document.getElementById('ntf-title').value = ''; document.getElementById('ntf-body').value = ''; toggleNTF(); renderTopics(); showToast('✅ Sujet publié !');
-}
-function submitReply() {
-  const text = document.getElementById('reply-inp').value.trim(); if (!text) return;
-  const t = TOPICS.find(x => x.id === curTopic);
-  t.replies.push({ author: me.name, ainit: me.init, body: text });
-  document.getElementById('reply-inp').value = ''; openTopic(curTopic); showToast('✅ Réponse publiée !');
+function updateHistory() {
+  const m = game.history(); let h = '';
+  for(let i=0; i<m.length; i+=2) h += `<b>${Math.floor(i/2)+1}.</b> ${m[i]} ${m[i+1]||''}<br>`;
+  document.getElementById('history-display').innerHTML = h;
 }
 
-// --- ADMIN ---
 async function loadPendingUsers() {
   const { data } = await sb.from('profiles').select('*').eq('account_status', 'pending');
   const list = document.getElementById('pending-users-list');
-  if (!data || !data.length) return list.innerHTML = '<p style="color:var(--g500)">Aucune validation en attente.</p>';
-  list.innerHTML = data.map(p => `<div class="member-card"><div class="m-info"><div class="m-name">${p.full_name}</div></div><button class="btn-defy" style="background:var(--green);color:white" onclick="valider('${p.id}','accepted')">Accepter</button><button class="btn-defy" style="background:var(--red);color:white" onclick="valider('${p.id}','rejected')">Refuser</button></div>`).join('');
+  if (!data || !data.length) { list.innerHTML = '<p>Aucune validation.</p>'; return; }
+  list.innerHTML = data.map(p => `<div class="member-card"><span>${p.full_name}</span><button onclick="valider('${p.id}','accepted')">✅</button></div>`).join('');
 }
-async function valider(id, stat) { await sb.from('profiles').update({ account_status: stat }).eq('id', id); loadPendingUsers(); }
+async function valider(id, s) { await sb.from('profiles').update({ account_status: s }).eq( 'id', id); loadPendingUsers(); }
 </script>
 </body>
 </html>
