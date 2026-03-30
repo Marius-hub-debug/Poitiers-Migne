@@ -576,7 +576,7 @@ a{text-decoration:none;cursor:pointer}
 // --- CONFIGURATION SUPABASE ---
 // L'URL doit finir par .supabase.co
 const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Ta clé complète ici
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ZXVlc3BtZ2J4Z3hjYWloZXJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDM5MjUsImV4cCI6MjA5MDM3OTkyNX0.h0EjR6sCeqapXmZOdZSaF-W1EsFSqYk5mK0B42BYV4o'; // Ta clé complète ici
 
 // "supabase" est l'objet chargé par le CDN (l'outil)
 // "sb" est ton instance personnelle (ta connexion)
