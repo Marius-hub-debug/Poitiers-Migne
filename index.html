@@ -724,11 +724,17 @@ function updateClockDisplay() {
    AUTH
 ═══════════════════════════ */
 function showAuth(p) {
-  ['page-login','page-register','app'].forEach(id => document.getElementById(id).classList.add('hidden'));
-  document.getElementById('page-' + p === 'app' ? 'app' : ('page-' + p)).classList.remove('hidden');
-  if (p === 'login')    document.getElementById('page-login').classList.remove('hidden');
-  if (p === 'register') document.getElementById('page-register').classList.remove('hidden');
-  if (p === 'app')      document.getElementById('app').classList.remove('hidden');
+  // On cache tout d'abord
+  document.getElementById('page-login').classList.add('hidden');
+  document.getElementById('page-register').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+
+  if (p === 'app') {
+    document.getElementById('app').classList.remove('hidden');
+  } else {
+    const target = document.getElementById('page-' + p);
+    if (target) target.classList.remove('hidden');
+  }
 }
 
 function pseudoToEmail(pseudo) {
@@ -764,18 +770,15 @@ async function doRegister() {
 function enterApp(profile) {
   const init = profile.full_name.substring(0, 2).toUpperCase();
   me = { id: profile.id, name: profile.full_name, init, isAdmin: profile.is_admin };
+  
+  showAuth('app'); 
+  goTo('home');
+
   document.getElementById('sb-name').textContent = profile.full_name;
   document.getElementById('sb-avatar').textContent = init;
   document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
   document.getElementById('sb-elo').textContent = `ELO ${profile.elo || '—'}`;
-
-  if (profile.is_admin) {
-    document.getElementById('nav-lbl-admin').style.display = 'block';
-    document.getElementById('nav-admin').style.display = 'flex';
-    if (!PAGES.includes('admin')) PAGES.push('admin');
-    loadPendingUsers();
-  }
-  showAuth('app');
+  
   initCadGrid();
   loadMembers();
   loadLobby();
@@ -785,9 +788,14 @@ function enterApp(profile) {
   listenToGames();
   trackPresence();
   listenToForum();
-  goTo('home');
-}
 
+  if (profile.is_admin) {
+    document.getElementById('nav-lbl-admin').style.display = 'block';
+    document.getElementById('nav-admin').style.display = 'flex';
+    if (!PAGES.includes('admin')) PAGES.push('admin');
+    loadPendingUsers();
+  }
+}
 function doLogout() {
   if (presenceChannel) sb.removeChannel(presenceChannel);
   stopClocks();
@@ -799,7 +807,7 @@ function doLogout() {
 /* ═══════════════════════════
    NAVIGATION
 ═══════════════════════════ */
-const PAGES = ['home','membres','stats','recentes','random','game','chat','forum'];
+const PAGES = ['home','membres','stats','recentes','random','game','chat','forum','admin'];
 
 function goTo(id) {
   PAGES.forEach(s => {
