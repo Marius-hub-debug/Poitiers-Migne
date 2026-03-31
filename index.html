@@ -1370,22 +1370,39 @@ async function submitTopic() {
   const title = document.getElementById('ntf-title').value.trim();
   const cat = document.getElementById('ntf-cat').value;
   const body = document.getElementById('ntf-body').value.trim();
-  if (!title || !body) { showToast('⚠️ Titre et message requis.'); return; }
-  const icon = cat.split(' ')[0];
-  const { data, error } = await sb.from('forum_topics').insert([{
-    title, category: cat.replace(/^.\s/, ''), icon,
-    author_id: me.id, author_name: me.name
-  }]).select().single();
-  if (error) { showToast('❌ Erreur de publication.'); return; }
-  await sb.from('forum_replies').insert([{
-    topic_id: data.id, body, author_id: me.id, author_name: me.name
-  }]);
-  document.getElementById('ntf-title').value = '';
-  document.getElementById('ntf-body').value = '';
-  toggleNTF();
-  showToast('✅ Sujet publié !');
-}
 
+  if (!title || !body) { showToast('⚠️ Titre et message requis.'); return; }
+
+  // On s'assure d'utiliser me.name (défini à la connexion)
+  const authorName = me.name || "Membre";
+
+  const { data, error } = await sb.from('forum_topics').insert([{
+    title: title,
+    category: cat.replace(/^.\s/, ''), // Enlève l'émoji devant la catégorie
+    icon: cat.split(' ')[0],
+    author_id: me.id,
+    author_name: authorName
+  }]).select().single();
+
+  if (error) {
+    console.error(error);
+    showToast('❌ Erreur : ' + error.message);
+  } else {
+    // On insère le premier message du sujet
+    await sb.from('forum_replies').insert([{
+      topic_id: data.id,
+      body: body,
+      author_id: me.id,
+      author_name: authorName
+    }]);
+
+    document.getElementById('ntf-title').value = '';
+    document.getElementById('ntf-body').value = '';
+    toggleNTF();
+    showToast('✅ Sujet publié !');
+    loadTopicsFromSB(); // Recharge la liste
+  }
+}
 async function submitReply() {
   const text = document.getElementById('reply-inp').value.trim();
   if (!text) { showToast('⚠️ Réponse vide.'); return; }
@@ -1470,7 +1487,6 @@ function undoMove() {
 function resetGame() {
   if (game) { game = new Chess(); board.start(); updateStatus(); updateHistory(); }
 }
-
 function initBoard() {
   if (board) return;
   game = new Chess();
@@ -1478,6 +1494,18 @@ function initBoard() {
     draggable: true,
     position: 'start',
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+    
+    // AJOUT DE CETTE SECTION POUR LES COUPS
+    onDragStart: (source, piece) => {
+      if (game.game_over()) return false;
+      // Si on n'est pas en partie libre, on vérifie la couleur
+      if (playerColor !== 'both') {
+        const myColorCode = playerColor === 'white' ? 'w' : 'b';
+        if (piece.charAt(0) !== myColorCode) return false; // Bloque les pièces adverses
+        if (game.turn() !== myColorCode) return false;     // Bloque si ce n'est pas ton tour
+      }
+    },
+    
     onDrop: onDrop,
     onMouseoverSquare: sq => addHL(sq),
     onMouseoutSquare: () => removeHL(),
@@ -1487,7 +1515,6 @@ function initBoard() {
   updateHistory();
   setTimeout(() => board.resize(), 80);
 }
-
 /* ═══════════════════════════
    UTILS
 ═══════════════════════════ */
