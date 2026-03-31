@@ -9,40 +9,32 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  /* ── NOUVELLE PALETTE INTÉGRÉE (Bleu Nuit, Anthracite & Or) ── */
-  --dark: #192a3d;         /* Couleur 4 : Bleu nuit/Marine */
-  --dark-mid: #343537;     /* Couleur 3 : Gris anthracite */
-  --gold: #efc900;         /* Couleur 1 : Jaune vif principal */
-  --gold-h: #dfbb00;       /* Couleur 9 : Jaune moutarde (survol) */
-  --gold-alt: #ffd700;     /* Couleur 2 : Doré */
-  --white: #ffffff;        /* Couleurs 5, 6, 7, 8 : Blanc */
-
-  /* Dérivés pour l'interface (fonds légers et bordures) basés sur vos dorés */
-  --gold-pale: rgba(255, 215, 0, 0.12); /* Doré (#ffd700) transparent pour les fonds */
-  --gold-muted: rgba(239, 201, 0, 0.35); /* Jaune vif (#efc900) adouci pour les bordures */
-
-  /* Nuances adaptées pour s'accorder avec le Bleu nuit et l'Anthracite */
-  --g50: #f8f9fa;
-  --g100: #f0f2f5;
-  --g200: #e4e7ec;
-  --g300: #d1d6e0;
-  --g400: #9ba3b5;
-  --g500: #6b758b;
-  --g600: #4b5468;
-  --g700: #343537;         /* Couleur 3 : Gris anthracite */
-  --g800: #192a3d;         /* Couleur 4 : Bleu nuit/Marine (Texte principal) */
-  
-  --green: #10B981;
-  --red: #EF4444;
-  
-  /* Ombres teintées avec votre Bleu Nuit (#192a3d = rgb(25, 42, 61)) */
-  --shadow-sm: 0 1px 3px rgba(25,42,61,.08), 0 1px 2px rgba(25,42,61,.04);
-  --shadow-md: 0 4px 16px rgba(25,42,61,.09), 0 2px 4px rgba(25,42,61,.04);
-  --shadow-lg: 0 16px 48px rgba(25,42,61,.16), 0 4px 8px rgba(25,42,61,.06);
-  --r: 12px;
-  --rs: 8px;
-  --side: 250px;
-  --tr: .18s cubic-bezier(.4,0,.2,1);
+  --dark: #192a3d;
+  --dark-mid: #343537;
+  --gold: #efc900;
+  --gold-h: #dfbb00;
+  --gold-alt: #ffd700;
+  --white: #ffffff;
+  --gold-pale: rgba(255,215,0,.12);
+  --gold-muted: rgba(239,201,0,.35);
+  --g50: #f8f9fa;
+  --g100: #f0f2f5;
+  --g200: #e4e7ec;
+  --g300: #d1d6e0;
+  --g400: #9ba3b5;
+  --g500: #6b758b;
+  --g600: #4b5468;
+  --g700: #343537;
+  --g800: #192a3d;
+  --green: #10B981;
+  --red: #EF4444;
+  --shadow-sm: 0 1px 3px rgba(25,42,61,.08), 0 1px 2px rgba(25,42,61,.04);
+  --shadow-md: 0 4px 16px rgba(25,42,61,.09), 0 2px 4px rgba(25,42,61,.04);
+  --shadow-lg: 0 16px 48px rgba(25,42,61,.16), 0 4px 8px rgba(25,42,61,.06);
+  --r: 12px;
+  --rs: 8px;
+  --side: 250px;
+  --tr: .18s cubic-bezier(.4,0,.2,1);
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -55,60 +47,31 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 ::-webkit-scrollbar-thumb:hover { background: var(--g300); }
 .hidden { display: none !important; }
 
-/* ── AUTH ── */
 .auth-page {
-  position: fixed; inset: 0; z-index: 200;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--dark);
-  background-image: repeating-conic-gradient(rgba(255,255,255,.02) 0% 25%, transparent 0% 50%) 0 0 / 80px 80px;
-  overflow: hidden;
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--dark);
+  background-image: repeating-conic-gradient(rgba(255,255,255,.02) 0% 25%, transparent 0% 50%) 0 0 / 80px 80px;
+  overflow: hidden;
 }
 .auth-deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.auth-deco span {
-  position: absolute; font-size: 130px; color: var(--gold); opacity: .03;
-  animation: floatP 10s ease-in-out infinite; user-select: none; line-height: 1;
-}
-@keyframes floatP {
-  0%, 100% { transform: translateY(0) rotate(-4deg); }
-  50% { transform: translateY(-26px) rotate(4deg); }
-}
-.auth-glow {
-  position: absolute; width: 500px; height: 500px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(239,201,0,.1) 0%, transparent 70%); pointer-events: none;
-}
-.auth-card {
-  position: relative; background: rgba(255,255,255,.98); backdrop-filter: blur(24px);
-  border-radius: 22px; padding: 46px 42px 38px; width: 100%; max-width: 415px;
-  box-shadow: var(--shadow-lg); animation: cardIn .5s cubic-bezier(.16,1,.3,1);
-}
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(26px) scale(.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
+.auth-deco span { position: absolute; font-size: 130px; color: var(--gold); opacity: .03; animation: floatP 10s ease-in-out infinite; user-select: none; line-height: 1; }
+@keyframes floatP { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-26px) rotate(4deg); } }
+.auth-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(239,201,0,.1) 0%, transparent 70%); pointer-events: none; }
+.auth-card { position: relative; background: rgba(255,255,255,.98); backdrop-filter: blur(24px); border-radius: 22px; padding: 46px 42px 38px; width: 100%; max-width: 415px; box-shadow: var(--shadow-lg); animation: cardIn .5s cubic-bezier(.16,1,.3,1); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .auth-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--g100); }
-.auth-logo .pm {
-  width: 41px; height: 41px; background: var(--gold); border-radius: 11px;
-  display: flex; align-items: center; justify-content: center; font-size: 21px; color: var(--dark); flex-shrink: 0; font-weight: bold;
-}
+.auth-logo .pm { width: 41px; height: 41px; background: var(--gold); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 21px; color: var(--dark); flex-shrink: 0; font-weight: bold; }
 .auth-logo h1 { font-family: 'Fraunces', serif; font-size: 15.5px; font-weight: 700; color: var(--dark); line-height: 1.25; }
 .auth-logo p { font-size: 10.5px; color: var(--g400); letter-spacing: .04em; text-transform: uppercase; margin-top: 2px; }
 .auth-card h2 { font-family: 'Fraunces', serif; font-size: 25px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
 .auth-sub { font-size: 13px; color: var(--g500); margin-bottom: 24px; line-height: 1.5; }
 .fg { margin-bottom: 13px; }
 .fg label { display: block; font-size: 11.5px; font-weight: 600; color: var(--dark); margin-bottom: 5px; letter-spacing: .03em; }
-.fg input {
-  width: 100%; padding: 10px 13px; border: 1.5px solid var(--g200); border-radius: var(--rs);
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: var(--g800);
-  background: var(--white); outline: none; transition: border-color var(--tr), box-shadow var(--tr);
-}
+.fg input { width: 100%; padding: 10px 13px; border: 1.5px solid var(--g200); border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: var(--g800); background: var(--white); outline: none; transition: border-color var(--tr), box-shadow var(--tr); }
 .fg input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(239,201,0,.15); }
 .fg input::placeholder { color: var(--g300); }
-.btn-auth {
-  width: 100%; padding: 12px; background: var(--gold); color: var(--dark); border: none;
-  border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
-  font-weight: 700; cursor: pointer; margin-top: 5px; transition: background var(--tr);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
+.btn-auth { width: 100%; padding: 12px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 5px; transition: background var(--tr); display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-auth:hover { background: var(--gold-h); }
 .auth-footer { text-align: center; margin-top: 18px; font-size: 12.5px; color: var(--g500); }
 .auth-footer a { color: var(--dark); font-weight: 700; text-decoration: underline; }
@@ -116,72 +79,38 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--g200); }
 .auth-divider span { font-size: 11px; color: var(--g400); }
 
-/* ── APP SHELL ── */
 #app { display: flex; height: 100vh; overflow: hidden; }
 
-.sidebar {
-  width: var(--side); flex-shrink: 0; background: var(--dark);
-  display: flex; flex-direction: column; position: relative; z-index: 10;
-  border-right: 1px solid rgba(255,255,255,.05);
-}
-.sidebar::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background-image: repeating-conic-gradient(rgba(255,255,255,.015) 0% 25%, transparent 0% 50%) 0 0 / 40px 40px;
-}
-.sb-brand {
-  padding: 19px 17px 15px; border-bottom: 1px solid rgba(255,255,255,.08);
-  position: relative; display: flex; align-items: center; gap: 10px;
-}
-.sb-piece {
-  width: 37px; height: 37px; background: rgba(239,201,0,.1);
-  border: 1px solid rgba(239,201,0,.25); border-radius: 9px;
-  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; color: var(--gold);
-}
+.sidebar { width: var(--side); flex-shrink: 0; background: var(--dark); display: flex; flex-direction: column; position: relative; z-index: 10; border-right: 1px solid rgba(255,255,255,.05); }
+.sidebar::before { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: repeating-conic-gradient(rgba(255,255,255,.015) 0% 25%, transparent 0% 50%) 0 0 / 40px 40px; }
+.sb-brand { padding: 19px 17px 15px; border-bottom: 1px solid rgba(255,255,255,.08); position: relative; display: flex; align-items: center; gap: 10px; }
+.sb-piece { width: 37px; height: 37px; background: rgba(239,201,0,.1); border: 1px solid rgba(239,201,0,.25); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; color: var(--gold); }
 .sb-bname { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 600; color: white; line-height: 1.3; }
 .sb-btag { font-size: 9px; color: var(--gold); letter-spacing: .07em; text-transform: uppercase; margin-top: 2px; font-weight: 600; }
 .sb-nav { flex: 1; padding: 13px 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
 .nav-lbl { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.3); font-weight: 700; padding: 12px 9px 4px; }
-.nav-item {
-  display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 8px;
-  cursor: pointer; color: rgba(255,255,255,.6); font-size: 12.5px; font-weight: 500;
-  transition: all var(--tr);
-}
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.6); font-size: 12.5px; font-weight: 500; transition: all var(--tr); }
 .nav-item:hover { background: rgba(255,255,255,.05); color: white; }
 .nav-item.active { background: rgba(239,201,0,.15); color: var(--gold); font-weight: 600; }
 .nav-item.active .ni { color: var(--gold); }
 .ni { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
-.nav-badge {
-  margin-left: auto; background: var(--gold); color: var(--dark);
-  font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 20px;
-  display: flex; align-items: center; gap: 3px;
-}
-.sb-foot {
-  padding: 11px 13px; border-top: 1px solid rgba(255,255,255,.08);
-  display: flex; align-items: center; gap: 9px;
-}
-.sb-av {
-  width: 31px; height: 31px; border-radius: 8px; background: var(--gold);
-  display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; color: var(--dark); flex-shrink: 0;
-}
+.nav-badge { margin-left: auto; background: var(--gold); color: var(--dark); font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 20px; }
+.sb-foot { padding: 11px 13px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 9px; }
+.sb-av { width: 31px; height: 31px; border-radius: 8px; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; color: var(--dark); flex-shrink: 0; }
 .sb-uname { font-size: 12px; font-weight: 600; color: white; line-height: 1.3; }
 .sb-uelo { font-size: 10px; color: rgba(255,255,255,.4); }
 .btn-logout { margin-left: auto; background: none; border: none; color: rgba(255,255,255,.3); cursor: pointer; font-size: 15px; padding: 4px; transition: color var(--tr); }
 .btn-logout:hover { color: var(--gold); }
 
-/* ── MAIN CONTENT ── */
 .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--g50); }
 .page-section { display: none; padding: 30px 34px 46px; max-width: 1060px; animation: secIn .25s cubic-bezier(.4,0,.2,1); }
 .page-section.active { display: block; }
-@keyframes secIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes secIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .page-hd { margin-bottom: 22px; }
 .page-hd h2 { font-family: 'Fraunces', serif; font-size: 27px; font-weight: 700; color: var(--dark); letter-spacing: -.02em; }
 .page-hd p { font-size: 13px; color: var(--g500); margin-top: 4px; }
 .card { background: var(--white); border-radius: var(--r); border: 1px solid var(--g200); box-shadow: var(--shadow-sm); }
 
-/* ── STATS CARDS ── */
 .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 11px; margin-bottom: 20px; }
 .stat-card { background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); padding: 17px; box-shadow: var(--shadow-sm); transition: box-shadow var(--tr); }
 .stat-card:hover { box-shadow: var(--shadow-md); }
@@ -193,19 +122,10 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .stat-sub { font-size: 11px; color: var(--g400); margin-top: 5px; }
 .stat-card.dk .stat-sub { color: rgba(255,255,255,.4); }
 
-/* ── HOME BANNER ── */
-.welcome-banner {
-  border-radius: 14px; padding: 26px 30px; background: var(--dark);
-  background-image: repeating-conic-gradient(rgba(255,255,255,.02) 0% 25%, transparent 0% 50%) 0 0 / 56px 56px;
-  color: white; position: relative; overflow: hidden; margin-bottom: 20px;
-}
+.welcome-banner { border-radius: 14px; padding: 26px 30px; background: var(--dark); background-image: repeating-conic-gradient(rgba(255,255,255,.02) 0% 25%, transparent 0% 50%) 0 0 / 56px 56px; color: white; position: relative; overflow: hidden; margin-bottom: 20px; }
 .welcome-banner h2 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; color: var(--gold); }
 .welcome-banner p { font-size: 12.5px; opacity: .7; margin-bottom: 18px; }
-.btn-play {
-  background: var(--gold); color: var(--dark); border: none; border-radius: 8px; padding: 9px 18px;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 800; cursor: pointer;
-  transition: transform var(--tr); display: inline-flex; align-items: center; gap: 5px;
-}
+.btn-play { background: var(--gold); color: var(--dark); border: none; border-radius: 8px; padding: 9px 18px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 800; cursor: pointer; transition: transform var(--tr); display: inline-flex; align-items: center; gap: 5px; }
 .btn-play:hover { transform: scale(1.03); background: var(--gold-h); }
 .welcome-deco { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); font-size: 90px; opacity: .05; user-select: none; pointer-events: none; color: var(--gold); }
 .leader-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--g100); }
@@ -213,64 +133,40 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .leader-rank { width: 24px; text-align: center; font-size: 13px; flex-shrink: 0; }
 .leader-elo { margin-left: auto; font-size: 10.5px; font-weight: 800; color: var(--dark); background: var(--gold-pale); border: 1px solid var(--gold-muted); padding: 2px 7px; border-radius: 20px; }
 
-/* ── MEMBERS GRID ── */
 .search-bar { position: relative; margin-bottom: 16px; }
-.search-bar input {
-  width: 100%; max-width: 350px; padding: 8px 13px 8px 36px; border: 1.5px solid var(--g200);
-  border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
-  outline: none; background: var(--white); transition: all var(--tr);
-}
+.search-bar input { width: 100%; max-width: 350px; padding: 8px 13px 8px 36px; border: 1.5px solid var(--g200); border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; outline: none; background: var(--white); transition: all var(--tr); }
 .search-bar input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(239,201,0,.15); }
 .si { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--g400); pointer-events: none; }
 .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 9px; }
-.member-card {
-  background: var(--white); border: 1.5px solid var(--g200); border-radius: var(--r);
-  padding: 13px 15px; display: flex; align-items: center; gap: 11px;
-  transition: all var(--tr);
-}
+.member-card { background: var(--white); border: 1.5px solid var(--g200); border-radius: var(--r); padding: 13px 15px; display: flex; align-items: center; gap: 11px; transition: all var(--tr); }
 .member-card:hover { box-shadow: var(--shadow-md); border-color: var(--gold-muted); transform: translateY(-2px); }
-.m-av {
-  width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
-  color: var(--dark); background: var(--gold); flex-shrink: 0; position: relative;
-}
+.m-av { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--dark); background: var(--gold); flex-shrink: 0; position: relative; }
 .odot { position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; }
-.odot.on { background: var(--green); }
-.odot.off { background: var(--g300); }
+.odot.on { background: var(--green); } .odot.off { background: var(--g300); }
 .m-info { flex: 1; min-width: 0; }
 .m-name { font-size: 13px; font-weight: 700; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .m-sub { font-size: 10.5px; color: var(--g400); margin-top: 2px; }
 .m-elo { display: inline-block; margin-top: 4px; background: var(--gold-pale); color: var(--dark); border: 1px solid var(--gold-muted); font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
-.btn-defy {
-  background: var(--dark); color: var(--gold); border: none; border-radius: 7px; padding: 7px 12px;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700;
-  cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all var(--tr);
-}
+.btn-defy { background: var(--dark); color: var(--gold); border: none; border-radius: 7px; padding: 7px 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all var(--tr); }
 .btn-defy:hover { background: var(--gold); color: var(--dark); }
 
-/* ── RECENT GAMES & OTHERS ── */
 .games-list { display: flex; flex-direction: column; gap: 8px; }
 .game-row { background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); padding: 12px 17px; display: flex; align-items: center; gap: 13px; transition: box-shadow var(--tr); }
 .game-row:hover { box-shadow: var(--shadow-md); }
 .res-badge { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
-.res-badge.win { background: #DCFCE7; color: #16A34A; }
-.res-badge.loss { background: #FEE2E2; color: #DC2626; }
-.res-badge.draw { background: var(--g100); color: var(--g500); }
+.res-badge.win { background: #DCFCE7; color: #16A34A; } .res-badge.loss { background: #FEE2E2; color: #DC2626; } .res-badge.draw { background: var(--g100); color: var(--g500); }
 .game-opp { font-size: 13px; font-weight: 700; color: var(--dark); }
 .game-meta { font-size: 11px; color: var(--g400); margin-top: 2px; }
+.game-info { flex: 1; min-width: 0; }
 .elo-delta { font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .elo-delta.pos { color: #16A34A; } .elo-delta.neg { color: #DC2626; } .elo-delta.nil { color: var(--g400); }
 
-/* ── STATS CHARTS ── */
 .chart-card { background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); padding: 20px 24px; margin-bottom: 16px; }
 .chart-card h3 { font-family: 'Fraunces', serif; font-size: 16px; color: var(--dark); margin-bottom: 16px; }
 .bars-wrap { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
 .bar { width: 100%; background: var(--g200); border-radius: 4px 4px 0 0; min-height: 5px; cursor: default; position: relative; transition: background var(--tr); }
-.bar:hover::after {
-  content: attr(data-v); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
-  background: var(--dark); color: white; font-size: 9px; font-weight: 600; padding: 2px 5px; border-radius: 4px; white-space: nowrap;
-}
+.bar:hover::after { content: attr(data-v); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: var(--dark); color: white; font-size: 9px; font-weight: 600; padding: 2px 5px; border-radius: 4px; white-space: nowrap; }
 .bar.cur { background: var(--gold); } .bar.up { background: var(--gold-pale); border: 1px solid var(--gold-muted); border-bottom: none; }
 .bar-lbl { font-size: 9px; color: var(--g400); }
 .two-col { display: flex; gap: 13px; }
@@ -291,7 +187,6 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .opp-bg { height: 4px; background: var(--g100); border-radius: 3px; overflow: hidden; }
 .opp-fill { height: 100%; border-radius: 3px; background: var(--gold); }
 
-/* ── RANDOM CHALLENGE ── */
 .random-center { display: flex; flex-direction: column; align-items: center; padding: 42px 20px; text-align: center; }
 .random-icon { font-size: 58px; margin-bottom: 13px; }
 .random-center h3 { font-family: 'Fraunces', serif; font-size: 23px; color: var(--dark); margin-bottom: 4px; }
@@ -307,22 +202,32 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .btn-primary { background: var(--dark); color: var(--gold); border: none; border-radius: 8px; padding: 10px 24px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background var(--tr); display: inline-flex; align-items: center; gap: 5px; }
 .btn-primary:hover { background: var(--gold); color: var(--dark); }
 
-/* ── GAME LAYOUT ── */
 .game-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
 #board { width: 420px; flex-shrink: 0; }
-#board .piece-417db { cursor: grab; }
-.game-panel { background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); padding: 18px; flex: 1; min-width: 185px; min-height: 420px; display: flex; flex-direction: column; }
-.game-panel h3 { font-family: 'Fraunces', serif; font-size: 15.5px; color: var(--dark); margin-bottom: 11px; }
-#status-display { font-size: 14px; font-weight: 700; color: var(--dark); padding: 10px 14px; background: var(--gold-pale); border-radius: 8px; margin-bottom: 13px; border-left: 4px solid var(--gold); }
-.game-btns { display: flex; gap: 6px; margin-bottom: 16px; }
+.game-panel { background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); padding: 18px; flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ── PENDULES ── */
+.clock-row { display: flex; gap: 9px; }
+.clock-box { flex: 1; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--g200); background: var(--g50); transition: all var(--tr); }
+.clock-box.clk-active { border-color: var(--gold); background: var(--gold-pale); }
+.clock-box.clk-low { border-color: var(--red) !important; background: rgba(239,68,68,.07) !important; animation: pulseLow 1s ease-in-out infinite; }
+@keyframes pulseLow { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+.clock-side { font-size: 10px; font-weight: 700; color: var(--g500); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 3px; }
+.clock-box.clk-active .clock-side { color: var(--dark); font-weight: 800; }
+.clock-time { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--dark); display: block; letter-spacing: .02em; }
+.clock-box.clk-low .clock-time { color: var(--red); }
+.clock-box.clk-active .clock-time { color: var(--dark); }
+
+#status-display { font-size: 14px; font-weight: 700; color: var(--dark); padding: 10px 14px; background: var(--gold-pale); border-radius: 8px; border-left: 4px solid var(--gold); }
+.game-btns { display: flex; gap: 6px; }
 .btn-game { flex: 1; padding: 8px; border: 1.5px solid var(--g200); border-radius: 7px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--g600); cursor: pointer; transition: all var(--tr); }
 .btn-game:hover { background: var(--dark); color: var(--gold); border-color: var(--dark); }
-.hist-lbl { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--g400); margin-bottom: 6px; }
-#history-display { flex: 1; overflow-y: auto; font-size: 12px; color: var(--g600); line-height: 2; }
+.hist-lbl { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--g400); }
+#history-display { flex: 1; overflow-y: auto; font-size: 12px; color: var(--g600); line-height: 2; min-height: 80px; max-height: 200px; }
 .square-55d63.highlight { background: radial-gradient(circle, rgba(239,201,0,.4) 25%, transparent 30%) !important; }
 
 /* ── CHAT ── */
-.chat-wrap { display: flex; gap: 0; height: calc(100vh - 132px); background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); overflow: hidden; }
+.chat-wrap { display: flex; height: calc(100vh - 132px); background: var(--white); border: 1px solid var(--g200); border-radius: var(--r); overflow: hidden; }
 .chat-sb { width: 190px; flex-shrink: 0; border-right: 1px solid var(--g100); background: var(--g50); padding: 12px 9px; display: flex; flex-direction: column; gap: 2px; }
 .ch-hd { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--g500); padding: 5px 8px 3px; }
 .ch-item { display: flex; align-items: center; gap: 7px; padding: 8px 9px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--g600); cursor: pointer; transition: all var(--tr); }
@@ -383,7 +288,7 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .ntf-select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--g200); border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; outline: none; background: var(--white); color: var(--dark); }
 .fg-row { display: flex; gap: 9px; margin-top: 14px; }
 
-/* ── MODALS ── */
+/* ── MODAL CADENCE ── */
 .modal-ov { position: fixed; inset: 0; z-index: 300; background: rgba(25,42,61,.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
 .modal-ov.hidden { display: none !important; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -401,16 +306,14 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 .cad-btn.sel { border-color: var(--gold); background: var(--gold-pale); }
 .cad-nm { font-size: 12.5px; font-weight: 700; color: var(--dark); }
 .cad-sub { font-size: 10px; color: var(--g500); margin-top: 2px; }
-.cad-btn.sel .cad-nm { color: var(--dark); }
 .modal-acts { display: flex; gap: 9px; }
 .btn-cancel { flex: 1; padding: 11px; border: 1.5px solid var(--g200); border-radius: var(--rs); background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: var(--g600); cursor: pointer; transition: all var(--tr); }
 .btn-cancel:hover { background: var(--g100); color: var(--dark); }
 .btn-confirm { flex: 2; padding: 11px; background: var(--dark); color: var(--gold); border: none; border-radius: var(--rs); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all var(--tr); }
 .btn-confirm:hover { background: var(--gold); color: var(--dark); }
 
-/* ── TOAST & UTILS ── */
 .empty-state { text-align: center; padding: 36px 20px; color: var(--g500); }
-.empty-state .ei { font-size: 38px; margin-bottom: 11px; opacity: 0.8; }
+.empty-state .ei { font-size: 38px; margin-bottom: 11px; opacity: .8; }
 .empty-state p { font-size: 13px; line-height: 1.6; }
 .toast { position: fixed; bottom: 22px; right: 22px; z-index: 999; background: var(--dark); color: var(--gold); border: 1px solid var(--gold-muted); padding: 12px 20px; border-radius: 9px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); animation: toastIn .3s ease; display: flex; align-items: center; gap: 7px; }
 .toast.hidden { display: none !important; }
@@ -512,22 +415,22 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
     <section class="page-section active" id="section-home">
       <div class="welcome-banner">
         <h2>Bon retour, <span id="welcome-name">joueur</span> ! ♟</h2>
-        <p>ELO et classement chargés depuis Supabase</p>
+        <p>ELO et classement synchronisés depuis Supabase</p>
         <button class="btn-play" onclick="goTo('game')">▶ Lancer une partie</button>
         <div class="welcome-deco">♚</div>
       </div>
       <div class="stats-row">
-        <div class="stat-card dk"><div class="stat-lbl">ELO actuel</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Victoires</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Taux victoire</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
-        <div class="stat-card">   <div class="stat-lbl">Rang club</div><div class="stat-val">—</div><div class="stat-sub">Via Supabase</div></div>
+        <div class="stat-card dk"><div class="stat-lbl">ELO actuel</div><div class="stat-val" id="home-elo">—</div><div class="stat-sub">Classement live</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Victoires</div><div class="stat-val" id="home-wins">—</div><div class="stat-sub" id="home-total">—</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Taux victoire</div><div class="stat-val" id="home-pct">—</div><div class="stat-sub">Sur les parties terminées</div></div>
+        <div class="stat-card">   <div class="stat-lbl">Rang club</div><div class="stat-val" id="home-rank">—</div><div class="stat-sub">Classement ELO</div></div>
       </div>
       <div class="card" style="padding:18px 22px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
-          <h3 style="font-family:'Fraunces',serif;font-size:16px;color:var(--navy)">Classement du club</h3>
-          <a onclick="goTo('membres')" style="font-size:12px;color:var(--blue);font-weight:600">Voir tous →</a>
+          <h3 style="font-family:'Fraunces',serif;font-size:16px;color:var(--dark)">Classement du club</h3>
+          <a onclick="goTo('membres')" style="font-size:12px;color:var(--dark);font-weight:700">Voir tous →</a>
         </div>
-        <div class="empty-state"><div class="ei">🏆</div><p>Le classement s'affichera ici une fois connecté à Supabase.</p></div>
+        <div id="home-leaderboard"><div class="empty-state"><div class="ei">🏆</div><p>Chargement…</p></div></div>
       </div>
     </section>
 
@@ -535,29 +438,29 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
       <div class="page-hd"><h2>Membres du club</h2><p>Statut en ligne, classement ELO et défis.</p></div>
       <div class="search-bar"><span class="si">🔍</span><input type="text" id="member-search" placeholder="Rechercher un membre…" oninput="filterMembers(this.value)"></div>
       <div class="members-grid" id="members-grid">
-        <div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Les membres s'afficheront ici une fois connecté à Supabase.</p></div>
+        <div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Chargement des membres…</p></div>
       </div>
     </section>
 
     <section class="page-section" id="section-stats">
-      <div class="page-hd"><h2>Mes statistiques</h2><p>Progression et performances.</p></div>
+      <div class="page-hd"><h2>Mes statistiques</h2><p>Progression et performances synchronisées.</p></div>
       <div class="stats-row">
-        <div class="stat-card dk"><div class="stat-lbl">ELO</div><div class="stat-val">—</div><div class="stat-sub">Supabase</div></div>
-        <div class="stat-card"><div class="stat-lbl">Parties</div><div class="stat-val">—</div><div class="stat-sub">Supabase</div></div>
-        <div class="stat-card"><div class="stat-lbl">Victoires</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
-        <div class="stat-card"><div class="stat-lbl">Nulles</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
-        <div class="stat-card"><div class="stat-lbl">Défaites</div><div class="stat-val">—</div><div class="stat-sub">—</div></div>
+        <div class="stat-card dk"><div class="stat-lbl">ELO</div><div class="stat-val" id="stats-elo">—</div><div class="stat-sub">Supabase</div></div>
+        <div class="stat-card"><div class="stat-lbl">Parties</div><div class="stat-val" id="stats-total">—</div><div class="stat-sub">Terminées</div></div>
+        <div class="stat-card"><div class="stat-lbl">Victoires</div><div class="stat-val" id="stats-wins">—</div><div class="stat-sub" id="stats-wins-pct">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Nulles</div><div class="stat-val" id="stats-draws">—</div><div class="stat-sub" id="stats-draws-pct">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Défaites</div><div class="stat-val" id="stats-losses">—</div><div class="stat-sub" id="stats-losses-pct">—</div></div>
       </div>
-      <div class="chart-card"><h3>Progression ELO</h3><div class="empty-state"><div class="ei">📈</div><p>Graphique disponible via Supabase.</p></div></div>
+      <div class="chart-card"><h3>Progression ELO</h3><div id="stats-elo-chart"><div class="empty-state"><div class="ei">📈</div><p>Chargement…</p></div></div></div>
       <div class="two-col">
-        <div class="donut-card"><h3>Résultats globaux</h3><div class="empty-state"><div class="ei">🥧</div><p>Données Supabase</p></div></div>
-        <div class="opp-card"><h3>Adversaires fréquents</h3><div class="empty-state"><div class="ei">⚔️</div><p>Données Supabase</p></div></div>
+        <div class="donut-card"><h3>Résultats globaux</h3><div id="stats-donut"><div class="empty-state"><div class="ei">🥧</div><p>Chargement…</p></div></div></div>
+        <div class="opp-card"><h3>Adversaires fréquents</h3><div id="stats-opps"><div class="empty-state"><div class="ei">⚔️</div><p>Chargement…</p></div></div></div>
       </div>
     </section>
 
     <section class="page-section" id="section-recentes">
-      <div class="page-hd"><h2>Parties récentes</h2><p>Historique complet de vos parties.</p></div>
-      <div class="games-list" id="games-list"><div class="empty-state"><div class="ei">♜</div><p>Vos parties apparaîtront ici une fois connecté à Supabase.</p></div></div>
+      <div class="page-hd"><h2>Parties récentes</h2><p>Historique complet synchronisé.</p></div>
+      <div class="games-list" id="games-list"><div class="empty-state"><div class="ei">♜</div><p>Chargement…</p></div></div>
     </section>
 
     <section class="page-section" id="section-chat">
@@ -586,7 +489,7 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 
     <section class="page-section" id="section-forum">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <div class="page-hd" style="margin-bottom:0"><h2>Forum</h2><p>Discussions, analyses et annonces du club.</p></div>
+        <div class="page-hd" style="margin-bottom:0"><h2>Forum</h2><p>Discussions, analyses et annonces — temps réel.</p></div>
         <button class="btn-new-topic" onclick="toggleNTF()">+ Nouveau sujet</button>
       </div>
       <div id="new-topic-form">
@@ -604,7 +507,7 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
         <div class="fg"><label>Message</label><textarea class="forum-ta" id="ntf-body" placeholder="Votre message…"></textarea></div>
         <div class="fg-row"><button class="btn-cancel" onclick="toggleNTF()">Annuler</button><button class="btn-confirm" onclick="submitTopic()">Publier le sujet</button></div>
       </div>
-      <div id="forum-list-view"><div class="forum-list" id="topics-list"></div></div>
+      <div id="forum-list-view"><div class="forum-list" id="topics-list"><div class="empty-state"><div class="ei">📋</div><p>Chargement…</p></div></div></div>
       <div id="forum-detail">
         <button class="back-btn" onclick="backToForum()">← Retour</button>
         <div class="page-hd"><h2 id="detail-title"></h2><p id="detail-meta"></p></div>
@@ -639,19 +542,37 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 
     <section class="page-section" id="section-game">
       <div id="game-lobby">
-        <div class="page-hd"><h2>Lobby de Jeu</h2><p>Choisissez un membre en ligne pour le défier.</p></div>
+        <div class="page-hd"><h2>Lobby de jeu</h2><p>Choisissez un adversaire ou lancez une partie libre.</p></div>
+        <div style="margin-bottom:16px">
+          <button class="btn-primary" onclick="startFreePlay()">♟ Partie libre (analyse)</button>
+        </div>
         <div class="members-grid" id="lobby-members-grid"></div>
       </div>
       <div id="game-board-area" class="hidden">
-        <div class="page-hd">
-          <h2 id="game-vs-title">Partie en cours</h2>
-          <button class="btn-game" onclick="quitGame()" style="width:auto;padding:5px 10px">⏻ Quitter</button>
+        <div class="page-hd" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div><h2 id="game-vs-title">Partie en cours</h2><p id="game-cadence-label" style="font-size:13px;color:var(--g400);margin-top:2px"></p></div>
+          <button class="btn-game" onclick="quitGame()" style="width:auto;padding:7px 14px;flex:none">⏻ Quitter</button>
         </div>
         <div class="game-layout">
           <div id="board"></div>
           <div class="game-panel">
+            <div class="clock-row" id="clock-row">
+              <div class="clock-box" id="clock-box-black">
+                <span class="clock-side">⬛ Noirs</span>
+                <span class="clock-time" id="time-black">—</span>
+              </div>
+              <div class="clock-box clk-active" id="clock-box-white">
+                <span class="clock-side">⬜ Blancs</span>
+                <span class="clock-time" id="time-white">—</span>
+              </div>
+            </div>
             <div id="status-display">Trait aux Blancs</div>
-            <div id="history-display" style="flex:1;overflow-y:auto;font-size:12px;margin-top:10px;color:var(--g500)"></div>
+            <div class="game-btns" id="free-play-btns" style="display:none">
+              <button class="btn-game" onclick="undoMove()">↩ Annuler</button>
+              <button class="btn-game" onclick="resetGame()">🔄 Rejouer</button>
+            </div>
+            <div class="hist-lbl">Historique</div>
+            <div id="history-display"></div>
           </div>
         </div>
       </div>
@@ -665,7 +586,7 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
     <h3>Choisir la cadence</h3>
     <p class="modal-sub">Sélectionnez le contrôle du temps pour ce défi.</p>
     <div class="modal-opp">
-      <div class="modal-opp-av av-1" id="modal-av">?</div>
+      <div class="modal-opp-av" id="modal-av">?</div>
       <div><div class="modal-opp-nm" id="modal-nm">—</div><div class="modal-opp-elo" id="modal-elo">ELO —</div></div>
     </div>
     <div class="cad-lbl">Cadence de jeu</div>
@@ -682,331 +603,888 @@ a { text-decoration: none; cursor: pointer; color: var(--gold-h); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
-  <script>
-// --- CONFIGURATION ---
+<script>
 const SUPABASE_URL = 'https://jyeuespmgbxgxcaihere.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ZXVlc3BtZ2J4Z3hjYWloZXJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDM5MjUsImV4cCI6MjA5MDM3OTkyNX0.h0EjR6sCeqapXmZOdZSaF-W1EsFSqYk5mK0B42BYV4o';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let me = { id: null, name: '', elo: 1200 };
-let current_game_id = null;
-let myColor = 'w'; 
-let modalOpp = null;
-let curCh = 'general';
-const PAGES = ['home','membres','random','game','chat','admin','stats','recentes','forum'];
-
-let game = null, board = null, boardInited = false;
-let whiteTime = 0, blackTime = 0, clockInterval = null;
-
 const CADENCES = [
-  {id:'b1', nm:'Bullet', sub:'1 min', t:'1+0'}, 
-  {id:'bl3', nm:'Blitz', sub:'3 min', t:'3+0'}, 
-  {id:'r10', nm:'Rapide', sub:'10 min', t:'10+0'}
+  {id:'b1',  nm:'Bullet',    sub:'1 min',   t:'1+0'  },
+  {id:'b2',  nm:'Bullet',    sub:'2+1',     t:'2+1'  },
+  {id:'bl3', nm:'Blitz',     sub:'3 min',   t:'3+0'  },
+  {id:'bl5', nm:'Blitz',     sub:'5+3',     t:'5+3'  },
+  {id:'r10', nm:'Rapide',    sub:'10 min',  t:'10+0' },
+  {id:'r15', nm:'Rapide',    sub:'15+10',   t:'15+10'},
+  {id:'c30', nm:'Classique', sub:'30 min',  t:'30+0' },
+  {id:'c45', nm:'Classique', sub:'45+15',   t:'45+15'},
+  {id:'c90', nm:'Classique', sub:'90+30',   t:'90+30'},
 ];
-let selCad = CADENCES[1];
+let selCad = CADENCES[2];
 
-// --- INITIALISATION AU CHARGEMENT ---
-window.onload = async () => {
-    // Vérifier si une session existe déjà
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-        const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) enterApp(profile);
-    }
+const CHAT_LOCAL = {
+  general:      [{sys:true, t:'Bienvenue dans #général ! Messages en temps réel via Supabase Realtime.'}],
+  resultats:    [{sys:true, t:'Canal #résultats — publiez vos scores ici.'}],
+  analyse:      [{sys:true, t:'Canal #analyse — partagez positions et lignes.'}],
+  'hors-sujet': [{sys:true, t:'Canal #hors-sujet — tout ce qui ne concerne pas les échecs !'}],
 };
+let curCh = 'general';
+let me = { id: null, name: '', init: '', isAdmin: false };
+let current_game_id = null;
+let modalOpp = null;
+let matchedOpp = null;
+let game = null;
+let board = null;
+let playerColor = 'both';
+let presenceChannel = null;
 
-// --- NAVIGATION ---
-function pseudoToEmail(pseudo) { return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local'; }
-function showToast(msg) { 
-    const t = document.getElementById('toast'); 
-    if(t){ t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3200); }
+/* ═══════════════════════════
+   PENDULES
+═══════════════════════════ */
+let clockInterval = null;
+let whiteTime = 0;
+let blackTime = 0;
+let clockIncrement = 0;
+let clockRunning = false;
+
+function parseCadence(str) {
+  const parts = str.split('+');
+  return { base: parseInt(parts[0]) * 60, increment: parseInt(parts[1]) || 0 };
 }
-function esc(s) { return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;') : ''; }
 
-function goTo(id) {
-  PAGES.forEach(s => {
-    const sec = document.getElementById('section-' + s);
-    const nav = document.getElementById('nav-' + s);
-    if (sec) sec.classList.remove('active');
-    if (nav) nav.classList.remove('active');
-  });
-  const targetSec = document.getElementById('section-' + id);
-  if (targetSec) targetSec.classList.add('active');
-  const targetNav = document.getElementById('nav-' + id);
-  if (targetNav) targetNav.classList.add('active');
-  if (id === 'game') initBoard();
+function formatTime(sec) {
+  if (sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function startClocks(cadStr) {
+  const { base, increment } = parseCadence(cadStr);
+  whiteTime = base;
+  blackTime = base;
+  clockIncrement = increment;
+  clockRunning = true;
+  document.getElementById('clock-row').style.display = 'flex';
+  updateClockDisplay();
+  clearInterval(clockInterval);
+  clockInterval = setInterval(tickClock, 1000);
+}
+
+function stopClocks() {
+  clockRunning = false;
+  clearInterval(clockInterval);
+}
+
+function tickClock() {
+  if (!game || !clockRunning) return;
+  if (game.turn() === 'w') {
+    whiteTime--;
+    if (whiteTime <= 0) {
+      whiteTime = 0;
+      stopClocks();
+      updateClockDisplay();
+      setTimeout(() => showToast('⏰ Temps écoulé ! Victoire des Noirs.'), 50);
+      return;
+    }
+  } else {
+    blackTime--;
+    if (blackTime <= 0) {
+      blackTime = 0;
+      stopClocks();
+      updateClockDisplay();
+      setTimeout(() => showToast('⏰ Temps écoulé ! Victoire des Blancs.'), 50);
+      return;
+    }
+  }
+  updateClockDisplay();
+}
+
+function addIncrement() {
+  if (!clockRunning) return;
+  if (game.turn() === 'b') whiteTime += clockIncrement; // white just moved
+  else blackTime += clockIncrement;                      // black just moved
+}
+
+function updateClockDisplay() {
+  const wBox = document.getElementById('clock-box-white');
+  const bBox = document.getElementById('clock-box-black');
+  const wTime = document.getElementById('time-white');
+  const bTime = document.getElementById('time-black');
+  if (!wBox || !bBox) return;
+
+  wTime.textContent = clockRunning || whiteTime > 0 ? formatTime(whiteTime) : '—';
+  bTime.textContent = clockRunning || blackTime > 0 ? formatTime(blackTime) : '—';
+
+  const whiteTurn = game && game.turn() === 'w';
+  wBox.className = 'clock-box' + (clockRunning && whiteTurn ? ' clk-active' : '') + (whiteTime <= 10 && clockRunning ? ' clk-low' : '');
+  bBox.className = 'clock-box' + (clockRunning && !whiteTurn ? ' clk-active' : '') + (blackTime <= 10 && clockRunning ? ' clk-low' : '');
+}
+
+/* ═══════════════════════════
+   AUTH
+═══════════════════════════ */
 function showAuth(p) {
-  document.getElementById('page-login').classList.add('hidden');
-  document.getElementById('page-register').classList.add('hidden');
-  document.getElementById('app').classList.add('hidden');
-  
-  const target = document.getElementById('page-' + p) || document.getElementById(p);
-  if(target) target.classList.remove('hidden');
+  ['page-login','page-register','app'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('page-' + p === 'app' ? 'app' : ('page-' + p)).classList.remove('hidden');
+  if (p === 'login')    document.getElementById('page-login').classList.remove('hidden');
+  if (p === 'register') document.getElementById('page-register').classList.remove('hidden');
+  if (p === 'app')      document.getElementById('app').classList.remove('hidden');
 }
 
-// --- AUTHENTIFICATION ---
+function pseudoToEmail(pseudo) {
+  return pseudo.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '@club.local';
+}
+
 async function doLogin() {
   const pseudo = document.getElementById('login-pseudo').value.trim();
   const pw = document.getElementById('login-pw').value;
-  if (!pseudo || !pw) { showToast('⚠️ Remplissez tout.'); return; }
-  
-  const { data, error } = await sb.auth.signInWithPassword({ email: pseudoToEmail(pseudo), password: pw });
-  
-  if (error) {
-      showToast('❌ Identifiants incorrects.');
-  } else {
-      const { data: profile, error: pError } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
-      if (profile) {
-          if (profile.account_status === 'pending') {
-            await sb.auth.signOut();
-            showToast('⏳ Attente de validation admin.');
-          } else {
-            enterApp(profile);
-          }
-      } else {
-          showToast('❌ Profil introuvable.');
-      }
-  }
+  if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
+  const email = pseudoToEmail(pseudo);
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) { showToast('❌ Identifiants incorrects.'); return; }
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
+  if (profile.account_status === 'pending') { await sb.auth.signOut(); showToast('⏳ Compte en attente de validation.'); return; }
+  if (profile.account_status === 'rejected') { await sb.auth.signOut(); showToast('❌ Compte refusé.'); return; }
+  enterApp(profile);
+  showToast('✅ Connexion réussie !');
 }
 
 async function doRegister() {
   const pseudo = document.getElementById('reg-pseudo').value.trim();
-  const name = document.getElementById('reg-name').value.trim();
   const pw = document.getElementById('reg-pw').value;
-  if (!pseudo || pw.length < 8) { showToast('⚠️ Pseudo requis et Mdp de 8 caractères.'); return; }
-  
-  const { data, error } = await sb.auth.signUp({ 
-    email: pseudoToEmail(pseudo), 
-    password: pw, 
-    options: { data: { full_name: name || pseudo } } 
+  if (!pseudo || !pw) { showToast('⚠️ Veuillez remplir tous les champs.'); return; }
+  if (pw.length < 8) { showToast('⚠️ Mot de passe trop court (8 min).'); return; }
+  const email = pseudoToEmail(pseudo);
+  const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { full_name: pseudo } } });
+  if (error) { showToast('❌ Erreur : ' + error.message); return; }
+  showToast('✅ Compte créé ! En attente de validation par un administrateur.');
+  showAuth('login');
+}
+
+function enterApp(profile) {
+  const init = profile.full_name.substring(0, 2).toUpperCase();
+  me = { id: profile.id, name: profile.full_name, init, isAdmin: profile.is_admin };
+  document.getElementById('sb-name').textContent = profile.full_name;
+  document.getElementById('sb-avatar').textContent = init;
+  document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
+  document.getElementById('sb-elo').textContent = `ELO ${profile.elo || '—'}`;
+
+  if (profile.is_admin) {
+    document.getElementById('nav-lbl-admin').style.display = 'block';
+    document.getElementById('nav-admin').style.display = 'flex';
+    if (!PAGES.includes('admin')) PAGES.push('admin');
+    loadPendingUsers();
+  }
+  showAuth('app');
+  initCadGrid();
+  loadMembers();
+  loadLobby();
+  loadStats();
+  loadRecentGames();
+  listenToChatRealtime();
+  listenToGames();
+  trackPresence();
+  listenToForum();
+  goTo('home');
+}
+
+function doLogout() {
+  if (presenceChannel) sb.removeChannel(presenceChannel);
+  stopClocks();
+  board = null;
+  game = null;
+  showAuth('login');
+}
+
+/* ═══════════════════════════
+   NAVIGATION
+═══════════════════════════ */
+const PAGES = ['home','membres','stats','recentes','random','game','chat','forum'];
+
+function goTo(id) {
+  PAGES.forEach(s => {
+    document.getElementById('section-'+s).classList.remove('active');
+    const n = document.getElementById('nav-'+s);
+    if (n) n.classList.remove('active');
   });
-  
-  if (error) showToast('❌ ' + error.message);
-  else { 
-      showToast('✅ Créé ! Attente validation.'); 
-      showAuth('login'); 
-  }
+  document.getElementById('section-'+id).classList.add('active');
+  const n = document.getElementById('nav-'+id);
+  if (n) n.classList.add('active');
+  if (id === 'game' && board === null) initBoard();
+  if (id === 'stats') loadStats();
+  if (id === 'recentes') loadRecentGames();
 }
 
-async function enterApp(profile) {
-  try {
-      // Sécurité si les données sont incomplètes
-      const fullName = profile.full_name || "Joueur";
-      me = { 
-          id: profile.id, 
-          name: fullName, 
-          init: fullName.substring(0, 2).toUpperCase(), 
-          elo: profile.elo || 1200, 
-          isAdmin: profile.is_admin 
-      };
-      
-      // UI Update immédiat
-      showAuth('app');
-      document.getElementById('sb-name').textContent = me.name;
-      document.getElementById('sb-avatar').textContent = me.init;
-      document.getElementById('welcome-name').textContent = me.name.split(' ')[0];
-      
-      if (profile.is_admin) {
-        document.getElementById('nav-lbl-admin').style.display = 'block';
-        document.getElementById('nav-admin').style.display = 'flex';
-        loadPendingUsers();
+/* ═══════════════════════════
+   TOAST
+═══════════════════════════ */
+let toastT;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+/* ═══════════════════════════
+   PRÉSENCE (membres en ligne)
+═══════════════════════════ */
+function trackPresence() {
+  presenceChannel = sb.channel('presence-online', { config: { presence: { key: me.id } } });
+  presenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const count = Object.keys(presenceChannel.presenceState()).length;
+      document.getElementById('online-badge').textContent = count;
+    })
+    .subscribe(async status => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({ user_id: me.id, name: me.name });
       }
+    });
+}
 
-      // Update statut en ligne
-      await sb.from('profiles').update({ is_online: true }).eq('id', me.id);
-
-      // Chargement data
-      initCadGrid();
-      loadMembers();
-      loadLobby();
-      listenToRealtime();
-      updateOnlineCount();
-      goTo('home');
-
-  } catch (e) {
-      console.error(e);
-      showToast("Erreur lors du chargement du profil.");
+/* ═══════════════════════════
+   ADMIN
+═══════════════════════════ */
+async function loadPendingUsers() {
+  const { data, error } = await sb.from('profiles').select('*').eq('account_status', 'pending');
+  const list = document.getElementById('pending-users-list');
+  if (error || !data?.length) {
+    list.innerHTML = '<div class="empty-state"><div class="ei">✅</div><p>Aucun compte en attente.</p></div>';
+    return;
   }
+  list.innerHTML = data.map(p => `
+    <div class="member-card" style="margin-bottom:10px">
+      <div class="m-av">${p.full_name.substring(0,2).toUpperCase()}</div>
+      <div class="m-info"><div class="m-name">${p.full_name}</div><div class="m-sub">Inscription récente</div></div>
+      <button class="btn-primary" style="background:var(--green);color:white" onclick="acceptUser('${p.id}')">Accepter</button>
+      <button class="btn-cancel" style="color:var(--red)" onclick="rejectUser('${p.id}')">Refuser</button>
+    </div>`).join('');
 }
 
-// --- REALTIME ---
-function listenToRealtime() {
-  fetchMessages();
-  
-  sb.channel('profiles_track').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-    updateOnlineCount(); loadMembers(); loadLobby();
-  }).subscribe();
-
-  sb.channel('chat_track').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => {
-    fetchMessages();
-  }).subscribe();
-
-  sb.channel('games_track').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, p => {
-    if (p.new.black_player_id === me.id && p.new.status === 'pending') {
-      if (confirm(`⚔️ Duel reçu de la part d'un membre ! Accepter ?`)) acceptChallenge(p.new.id, p.new.cadence);
-    }
-  }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, p => {
-    const g = p.new;
-    if (g.id === current_game_id) {
-      if (g.status === 'in_progress' && document.getElementById('game-board-area').classList.contains('hidden')) {
-        startLiveGame(g.id, me.id === g.white_player_id ? 'white' : 'black', g.cadence);
-      }
-      if (g.last_move_by && g.last_move_by !== me.id) {
-        game.move(g.last_move); 
-        board.position(game.fen()); 
-        updateClockUI();
-      }
-    }
-  }).subscribe();
+async function acceptUser(id) {
+  await sb.from('profiles').update({ account_status: 'accepted' }).eq('id', id);
+  showToast('✅ Joueur accepté !'); loadPendingUsers();
+}
+async function rejectUser(id) {
+  await sb.from('profiles').update({ account_status: 'rejected' }).eq('id', id);
+  showToast('❌ Joueur refusé.'); loadPendingUsers();
 }
 
-// --- JEU ---
-function initBoard() {
-  if (boardInited) return; 
-  boardInited = true;
-  game = new Chess();
-  board = Chessboard('board', {
-    draggable: true, position: 'start',
-    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-    onDragStart: (source, piece) => {
-      if (game.game_over()) return false;
-      if ((myColor === 'w' && piece.search(/^b/) !== -1) || (myColor === 'b' && piece.search(/^w/) !== -1)) return false;
-      if (game.turn() !== myColor) return false;
-    },
-    onDrop: async (src, tgt) => {
-      const move = game.move({ from: src, to: tgt, promotion: 'q' });
-      if (!move) return 'snapback';
-      updateClockUI();
-      if (current_game_id) await sb.from('games').update({ last_move: move.san, last_move_by: me.id, pgn: game.pgn() }).eq('id', current_game_id);
-    },
-    onSnapEnd: () => board.position(game.fen())
-  });
-}
-
-function startClocks(cad) {
-  const base = parseInt(cad.split('+')[0]) * 60;
-  whiteTime = blackTime = base;
-  if(clockInterval) clearInterval(clockInterval);
-  clockInterval = setInterval(() => {
-    if (game.turn() === 'w') whiteTime--; else blackTime--;
-    updateClockUI();
-    if(whiteTime <= 0 || blackTime <= 0) clearInterval(clockInterval);
-  }, 1000);
-}
-
-function updateClockUI() {
-  const f = (t) => `${Math.floor(t/60)}:${(t%60).toString().padStart(2,'0')}`;
-  const status = document.getElementById('status-display');
-  if(status) {
-    status.innerHTML = `
-      <div style="display:flex; justify-content:space-between; font-weight:bold">
-        <span style="color:${game.turn()==='w'?'#efc900':'inherit'}">Blancs: ${f(whiteTime)}</span>
-        <span style="color:${game.turn()==='b'?'#efc900':'inherit'}">Noirs: ${f(blackTime)}</span>
-      </div>`;
-  }
-}
-
-// --- CHARGEMENT DONNÉES ---
+/* ═══════════════════════════
+   MEMBRES
+═══════════════════════════ */
 async function loadMembers() {
   const { data } = await sb.from('profiles').select('*').eq('account_status', 'accepted').order('elo', { ascending: false });
   const grid = document.getElementById('members-grid');
-  if (data && grid) {
-    grid.innerHTML = data.map(p => `
-      <div class="member-card">
-        <div class="m-av">${(p.full_name || "??").substring(0,2).toUpperCase()} <div class="odot ${p.is_online ? 'on' : 'off'}"></div></div>
-        <div class="m-info"><div class="m-name">${esc(p.full_name)}</div><div class="m-elo">ELO ${p.elo || 1200}</div></div>
-      </div>`).join('');
-  }
+  if (!data?.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Aucun membre trouvé.</p></div>'; return; }
+  grid.innerHTML = data.map(p => {
+    const isMe = p.id === me.id;
+    return `<div class="member-card">
+      <div class="m-av">${p.full_name.substring(0,2).toUpperCase()}</div>
+      <div class="m-info">
+        <div class="m-name">${p.full_name}${isMe ? ' <small style="color:var(--g400);font-weight:500">(vous)</small>' : ''}</div>
+        <div class="m-elo">ELO ${p.elo || '—'}</div>
+      </div>
+      ${!isMe ? `<button class="btn-defy" onclick="defyMember({id:'${p.id}',name:'${p.full_name}'})">Défier</button>` : ''}
+    </div>`;
+  }).join('');
+
+  // Classement accueil
+  const top5 = data.slice(0, 5);
+  const medals = ['🥇','🥈','🥉','4','5'];
+  document.getElementById('home-leaderboard').innerHTML = top5.map((p,i) => `
+    <div class="leader-row">
+      <div class="leader-rank">${medals[i]}</div>
+      <div class="m-av" style="width:30px;height:30px;font-size:10px;border-radius:7px">${p.full_name.substring(0,2).toUpperCase()}</div>
+      <div style="flex:1;font-size:13px;font-weight:600;color:var(--dark)">${p.full_name}</div>
+      <div class="leader-elo">ELO ${p.elo || '—'}</div>
+    </div>`).join('');
+
+  // Rang du joueur
+  const myRank = data.findIndex(p => p.id === me.id) + 1;
+  if (myRank > 0) document.getElementById('home-rank').textContent = '#' + myRank;
 }
 
+function filterMembers(q) {
+  document.querySelectorAll('#members-grid .member-card').forEach(card => {
+    card.style.display = card.querySelector('.m-name').textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+/* ═══════════════════════════
+   STATISTIQUES (Supabase)
+═══════════════════════════ */
+async function loadStats() {
+  if (!me.id) return;
+  const [{ data: profileData }, { data: gamesData }] = await Promise.all([
+    sb.from('profiles').select('elo').eq('id', me.id).single(),
+    sb.from('games').select('*').or(`white_player_id.eq.${me.id},black_player_id.eq.${me.id}`).eq('status', 'finished')
+  ]);
+
+  const elo = profileData?.elo || '—';
+  const total = gamesData?.length || 0;
+  let wins = 0, draws = 0, losses = 0;
+  const eloHistory = [];
+  const oppMap = {};
+
+  (gamesData || []).forEach(g => {
+    const isWhite = g.white_player_id === me.id;
+    const result = g.result;
+    if (result === 'draw') draws++;
+    else if ((result === 'white' && isWhite) || (result === 'black' && !isWhite)) wins++;
+    else losses++;
+    if (g.elo_after) eloHistory.push(g.elo_after);
+    const oppId = isWhite ? g.black_player_id : g.white_player_id;
+    if (oppId) {
+      if (!oppMap[oppId]) oppMap[oppId] = { games: 0, wins: 0, name: oppId };
+      oppMap[oppId].games++;
+      if ((result === 'white' && isWhite) || (result === 'black' && !isWhite)) oppMap[oppId].wins++;
+    }
+  });
+
+  const winPct = total > 0 ? Math.round(wins / total * 100) : 0;
+  const drawPct = total > 0 ? Math.round(draws / total * 100) : 0;
+  const lossPct = total > 0 ? Math.round(losses / total * 100) : 0;
+
+  document.getElementById('home-elo').textContent    = elo;
+  document.getElementById('home-wins').textContent   = wins;
+  document.getElementById('home-total').textContent  = `sur ${total} partie${total > 1 ? 's' : ''}`;
+  document.getElementById('home-pct').textContent    = winPct + '%';
+  document.getElementById('sb-elo').textContent      = `ELO ${elo}`;
+  document.getElementById('stats-elo').textContent   = elo;
+  document.getElementById('stats-total').textContent = total;
+  document.getElementById('stats-wins').textContent  = wins;
+  document.getElementById('stats-draws').textContent = draws;
+  document.getElementById('stats-losses').textContent = losses;
+  document.getElementById('stats-wins-pct').textContent   = winPct + '%';
+  document.getElementById('stats-draws-pct').textContent  = drawPct + '%';
+  document.getElementById('stats-losses-pct').textContent = lossPct + '%';
+
+  renderEloChart(eloHistory.slice(-10));
+  renderDonut(wins, draws, losses, total);
+  renderOpponents(oppMap);
+}
+
+function renderEloChart(history) {
+  const el = document.getElementById('stats-elo-chart');
+  if (!history.length) { el.innerHTML = '<div class="empty-state"><div class="ei">📈</div><p>Aucune partie terminée.</p></div>'; return; }
+  const mn = Math.min(...history), mx = Math.max(...history);
+  const range = mx - mn || 1;
+  el.innerHTML = `<div class="bars-wrap">${history.map((v,i) => {
+    const pct = ((v - mn) / range * 72 + 14).toFixed(1);
+    const last = i === history.length - 1;
+    const up = i > 0 && v >= history[i-1];
+    return `<div class="bar-col"><div class="bar${last?' cur':up?' up':''}" style="height:${pct}%" data-v="ELO ${v}"></div><div class="bar-lbl">P${i+1}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function renderDonut(wins, draws, losses, total) {
+  const el = document.getElementById('stats-donut');
+  if (!total) { el.innerHTML = '<div class="empty-state"><div class="ei">🥧</div><p>Aucune donnée.</p></div>'; return; }
+  const wp = (wins / total * 100).toFixed(1), dp = (draws / total * 100).toFixed(1), lp = (losses / total * 100).toFixed(1);
+  el.innerHTML = `<div class="donut-wrap">
+    <div class="dsv">
+      <svg viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E2E8F0" stroke-width="3.6"/>
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--gold')}" stroke-width="3.6" stroke-dasharray="${wp} ${100-wp}" stroke-linecap="round"/>
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--green')}" stroke-width="3.6" stroke-dasharray="${dp} ${100-dp}" stroke-dashoffset="${-wp}" stroke-linecap="round"/>
+        <circle cx="18" cy="18" r="15.9" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--red')}" stroke-width="3.6" stroke-dasharray="${lp} ${100-lp}" stroke-dashoffset="${-(parseFloat(wp)+parseFloat(dp))}" stroke-linecap="round"/>
+      </svg>
+      <div class="dct">${Math.round(wins/total*100)}%</div>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>Victoires — ${wp}%</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Nulles — ${dp}%</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Défaites — ${lp}%</div>
+    </div>
+  </div>`;
+}
+
+async function renderOpponents(oppMap) {
+  const el = document.getElementById('stats-opps');
+  const entries = Object.values(oppMap).sort((a,b) => b.games - a.games).slice(0, 4);
+  if (!entries.length) { el.innerHTML = '<div class="empty-state"><div class="ei">⚔️</div><p>Aucun adversaire.</p></div>'; return; }
+  const ids = entries.map(e => e.name);
+  const { data } = await sb.from('profiles').select('id,full_name').in('id', ids);
+  const nameMap = {};
+  (data || []).forEach(p => nameMap[p.id] = p.full_name);
+  el.innerHTML = entries.map(o => {
+    const pct = Math.round(o.wins / o.games * 100);
+    const name = nameMap[o.name] || 'Membre';
+    return `<div class="opp-row">
+      <div class="opp-row-h"><span class="opp-nm">${name}</span><span class="opp-rc">${o.wins}/${o.games}</span></div>
+      <div class="opp-bg"><div class="opp-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════
+   PARTIES RÉCENTES (Supabase)
+═══════════════════════════ */
+async function loadRecentGames() {
+  if (!me.id) return;
+  const { data } = await sb.from('games')
+    .select('*, white_profile:profiles!white_player_id(full_name), black_profile:profiles!black_player_id(full_name)')
+    .or(`white_player_id.eq.${me.id},black_player_id.eq.${me.id}`)
+    .eq('status', 'finished')
+    .order('updated_at', { ascending: false })
+    .limit(30);
+
+  const list = document.getElementById('games-list');
+  if (!data?.length) {
+    list.innerHTML = '<div class="empty-state"><div class="ei">♜</div><p>Aucune partie terminée pour l\'instant.</p></div>';
+    return;
+  }
+  list.innerHTML = data.map(g => {
+    const isWhite = g.white_player_id === me.id;
+    const opp = isWhite ? g.black_profile?.full_name : g.white_profile?.full_name;
+    const result = g.result;
+    let type, dClass, dText;
+    if (result === 'draw') { type = 'draw'; dText = '±0'; dClass = 'nil'; }
+    else if ((result === 'white' && isWhite) || (result === 'black' && !isWhite)) { type = 'win'; dText = `+${g.elo_change || '?'}`; dClass = 'pos'; }
+    else { type = 'loss'; dText = `-${g.elo_change || '?'}`; dClass = 'neg'; }
+    const date = g.updated_at ? new Date(g.updated_at).toLocaleDateString('fr-FR', {day:'numeric', month:'long'}) : '—';
+    return `<div class="game-row">
+      <div class="res-badge ${type}">${type === 'win' ? 'V' : type === 'loss' ? 'D' : 'N'}</div>
+      <div class="game-info">
+        <div class="game-opp">vs ${opp || 'Inconnu'}</div>
+        <div class="game-meta">${date} · ${g.cadence || '—'}</div>
+      </div>
+      <div class="elo-delta ${dClass}">${dText} ELO</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════
+   LOBBY & DÉFI
+═══════════════════════════ */
 async function loadLobby() {
-  const { data } = await sb.from('profiles').select('*').eq('is_online', true).neq('id', me.id);
+  const { data } = await sb.from('profiles').select('*').eq('account_status', 'accepted').neq('id', me.id);
   const grid = document.getElementById('lobby-members-grid');
-  if (data && grid) {
-    grid.innerHTML = data.map(p => `
-      <div class="member-card">
-        <div class="m-av">${(p.full_name || "??").substring(0,2).toUpperCase()}</div>
-        <div class="m-info"><div class="m-name">${esc(p.full_name)}</div><div class="m-elo">ELO ${p.elo || 1200}</div></div>
-        <button class="btn-defy" onclick="defyMember({id:'${p.id}', name:'${p.full_name}'})">Défier</button>
-      </div>`).join('');
-  }
+  if (!data?.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div><p>Aucun autre membre.</p></div>'; return; }
+  grid.innerHTML = data.map(p => `
+    <div class="member-card">
+      <div class="m-av">${p.full_name.substring(0,2).toUpperCase()}</div>
+      <div class="m-info"><div class="m-name">${p.full_name}</div><div class="m-elo">ELO ${p.elo || '—'}</div></div>
+      <button class="btn-defy" onclick="defyMember({id:'${p.id}',name:'${p.full_name}'})">Défier</button>
+    </div>`).join('');
 }
 
-async function updateOnlineCount() {
-  const { count } = await sb.from('profiles').select('id', { head: true, count: 'exact' }).eq('is_online', true);
-  const badge = document.getElementById('online-badge');
-  if(badge) badge.textContent = count || 0;
+function defyMember(opp) { openModal(opp); }
+
+function initCadGrid() {
+  document.getElementById('cad-grid').innerHTML = CADENCES.map(c =>
+    `<div class="cad-btn${c.id === selCad.id ? ' sel' : ''}" onclick="selCadence('${c.id}',this)">
+      <div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div>
+    </div>`).join('');
 }
 
-// --- CHAT ---
+function selCadence(id, el) {
+  selCad = CADENCES.find(c => c.id === id);
+  document.querySelectorAll('.cad-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function openModal(opp) {
+  if (!opp) return;
+  modalOpp = opp;
+  const init = (opp.name || '?').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  const av = document.getElementById('modal-av');
+  av.textContent = init;
+  document.getElementById('modal-nm').textContent = opp.name || '—';
+  document.getElementById('modal-elo').textContent = opp.elo ? `ELO ${opp.elo}` : 'ELO Supabase';
+  document.getElementById('modal-ov').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+
+async function confirmChallenge() {
+  closeModal();
+  showToast(`⏳ Défi envoyé à ${modalOpp.name}…`);
+  const { data, error } = await sb.from('games').insert([{
+    white_player_id: me.id,
+    black_player_id: modalOpp.id,
+    cadence: selCad.t,
+    status: 'pending'
+  }]).select().single();
+  if (!error) current_game_id = data.id;
+}
+
+function listenToGames() {
+  sb.channel('room_echecs')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'games' }, payload => {
+      const g = payload.new;
+      if (g.black_player_id === me.id && g.status === 'pending') {
+        if (confirm(`⚔️ Défi reçu ! Cadence : ${g.cadence}. Accepter ?`)) {
+          const cad = CADENCES.find(c => c.t === g.cadence) || CADENCES[2];
+          selCad = cad;
+          acceptChallenge(g.id);
+        }
+      }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, payload => {
+      const g = payload.new;
+      if (g.white_player_id === me.id && g.status === 'in_progress' && current_game_id === g.id) {
+        startLiveGame(g.id, 'white');
+      }
+      if (g.id === current_game_id && g.last_move_by !== me.id && g.last_move) {
+        game.move(g.last_move);
+        addIncrement();
+        board.position(game.fen());
+        updateStatus();
+        updateHistory();
+        updateClockDisplay();
+        if (game.in_checkmate() || game.in_draw()) stopClocks();
+      }
+    })
+    .subscribe();
+}
+
+async function acceptChallenge(id) {
+  current_game_id = id;
+  await sb.from('games').update({ status: 'in_progress' }).eq('id', id);
+  startLiveGame(id, 'black');
+}
+
+function startLiveGame(gameId, color) {
+  document.getElementById('game-lobby').classList.add('hidden');
+  document.getElementById('game-board-area').classList.remove('hidden');
+  document.getElementById('free-play-btns').style.display = 'none';
+  playerColor = color;
+  goTo('game');
+  if (!board) initBoard(); else { game = new Chess(); board.start(); }
+  board.orientation(color);
+  document.getElementById('game-vs-title').textContent = 'Partie en cours';
+  document.getElementById('game-cadence-label').textContent = `Cadence : ${selCad.nm} ${selCad.sub}`;
+  startClocks(selCad.t);
+  updateStatus();
+  updateHistory();
+  showToast('⚔️ La partie commence !');
+}
+
+function startFreePlay() {
+  document.getElementById('game-lobby').classList.add('hidden');
+  document.getElementById('game-board-area').classList.remove('hidden');
+  document.getElementById('free-play-btns').style.display = 'flex';
+  document.getElementById('clock-row').style.display = 'none';
+  playerColor = 'both';
+  goTo('game');
+  if (!board) initBoard(); else { game = new Chess(); board.start(); board.orientation('white'); }
+  document.getElementById('game-vs-title').textContent = 'Partie libre';
+  document.getElementById('game-cadence-label').textContent = 'Analyse — aucun chronomètre';
+  stopClocks();
+  updateStatus();
+  updateHistory();
+}
+
+function quitGame() {
+  stopClocks();
+  document.getElementById('game-lobby').classList.remove('hidden');
+  document.getElementById('game-board-area').classList.add('hidden');
+  current_game_id = null;
+  playerColor = 'both';
+  document.getElementById('clock-row').style.display = 'none';
+}
+
+/* ═══════════════════════════
+   DÉFI ALÉATOIRE
+═══════════════════════════ */
+async function findRandom() {
+  const sp = document.getElementById('rand-spinner'), cd = document.getElementById('matched-card');
+  cd.style.display = 'none'; sp.style.display = 'block';
+  const { data } = await sb.from('profiles').select('*').eq('account_status', 'accepted').neq('id', me.id);
+  setTimeout(() => {
+    sp.style.display = 'none';
+    if (!data?.length) { showToast('Aucun membre disponible.'); return; }
+    const pick = data[Math.floor(Math.random() * data.length)];
+    matchedOpp = { id: pick.id, name: pick.full_name, elo: pick.elo };
+    document.getElementById('matched-name').textContent = pick.full_name;
+    document.getElementById('matched-elo').textContent = `ELO ${pick.elo || '—'}`;
+    cd.style.display = 'block';
+  }, 1800);
+}
+
+/* ═══════════════════════════
+   CHAT
+═══════════════════════════ */
+function listenToChatRealtime() {
+  fetchMessages();
+  sb.channel('public:chat_messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, async payload => {
+      const msg = payload.new;
+      if (msg.channel !== curCh) return;
+      const { data: author } = await sb.from('profiles').select('full_name').eq('id', msg.author_id).single();
+      const name = author?.full_name || 'Membre';
+      const init = name.substring(0, 2).toUpperCase();
+      const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      CHAT_LOCAL[curCh].push({ author: name, init, t: msg.content, time });
+      renderChat();
+    })
+    .subscribe();
+}
+
 async function fetchMessages() {
-  const { data } = await sb.from('chat_messages').select('*').eq('channel', curCh).order('created_at', { ascending: true }).limit(50);
-  const el = document.getElementById('chat-msgs');
-  if (data && el) {
-    el.innerHTML = data.map(m => `
-      <div class="chat-msg ${m.author_id===me.id?'me':''}">
-        <div class="cm-text">${esc(m.content)}</div>
-      </div>`).join('');
-    el.scrollTop = el.scrollHeight;
+  const { data } = await sb.from('chat_messages')
+    .select('*, author:profiles!author_id(full_name)')
+    .eq('channel', curCh)
+    .order('created_at', { ascending: true })
+    .limit(80);
+  if (data) {
+    CHAT_LOCAL[curCh] = [{ sys: true, t: `Canal #${curCh.replace('-',' ')} — Supabase Realtime.` }];
+    data.forEach(m => {
+      const name = m.author?.full_name || 'Membre';
+      const time = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      CHAT_LOCAL[curCh].push({ author: name, init: name.substring(0,2).toUpperCase(), t: m.content, time });
+    });
+    renderChat();
   }
+}
+
+function switchCh(ch, el) {
+  curCh = ch;
+  document.querySelectorAll('.ch-item').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chat-ch-title').textContent = '# ' + ch.replace('-', ' ');
+  fetchMessages();
+}
+
+function renderChat() {
+  const el = document.getElementById('chat-msgs');
+  el.innerHTML = (CHAT_LOCAL[curCh] || []).map(m => {
+    if (m.sys) return `<div class="sys-msg">— ${m.t} —</div>`;
+    const isMe = m.author === me.name;
+    return `<div class="chat-msg${isMe ? ' me' : ''}">
+      <div class="cm-av">${m.init || '?'}</div>
+      <div>
+        <div><span class="cm-name">${m.author}</span><span class="cm-time">${m.time || ''}</span></div>
+        <div class="cm-text">${esc(m.t)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
 }
 
 async function sendChat() {
   const inp = document.getElementById('chat-inp');
-  if (!inp || !inp.value.trim()) return;
-  await sb.from('chat_messages').insert([{ channel: curCh, content: inp.value, author_id: me.id }]);
+  const text = inp.value.trim();
+  if (!text) return;
+  const { error } = await sb.from('chat_messages').insert([{ channel: curCh, content: text, author_id: me.id }]);
+  if (error) showToast('Erreur d\'envoi');
   inp.value = '';
 }
 
-// --- AUTRES FONCTIONS ---
-function defyMember(opp) { 
-    modalOpp = opp; 
-    document.getElementById('modal-nm').textContent = opp.name; 
-    document.getElementById('modal-ov').classList.remove('hidden'); 
-}
-function closeModal() { document.getElementById('modal-ov').classList.add('hidden'); }
-function initCadGrid() { 
-    const cg = document.getElementById('cad-grid');
-    if(cg) cg.innerHTML = CADENCES.map(c => `<div class="cad-btn ${c.id===selCad.id?'sel':''}" onclick="selCadence('${c.id}',this)"><div class="cad-nm">${c.nm}</div><div class="cad-sub">${c.sub}</div></div>`).join(''); 
-}
-function selCadence(id,el) { 
-    selCad = CADENCES.find(c=>c.id===id); 
-    document.querySelectorAll('.cad-btn').forEach(b=>b.classList.remove('sel')); 
-    el.classList.add('sel'); 
+/* ═══════════════════════════
+   FORUM — SUPABASE REALTIME
+═══════════════════════════ */
+let curTopic = null;
+
+function listenToForum() {
+  loadTopicsFromSB();
+  sb.channel('public:forum')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'forum_topics' }, () => loadTopicsFromSB())
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'forum_replies' }, payload => {
+      loadTopicsFromSB();
+      if (curTopic && payload.new.topic_id === curTopic) loadRepliesFromSB(curTopic);
+    })
+    .subscribe();
 }
 
-async function confirmChallenge() {
-  closeModal();
-  const { data, error } = await sb.from('games').insert([{ white_player_id: me.id, black_player_id: modalOpp.id, cadence: selCad.t, status: 'pending' }]).select().single();
-  if(!error) { current_game_id = data.id; showToast("⚔️ Défi envoyé !"); }
+async function loadTopicsFromSB() {
+  const { data, error } = await sb.from('forum_topics')
+    .select('*, forum_replies(count)')
+    .order('created_at', { ascending: false });
+  if (error || !data) { renderLocalTopics(); return; }
+  const list = document.getElementById('topics-list');
+  if (!data.length) { list.innerHTML = '<div class="empty-state"><div class="ei">📋</div><p>Aucun sujet. Soyez le premier !</p></div>'; return; }
+  list.innerHTML = data.map(t => {
+    const count = t.forum_replies?.[0]?.count || 0;
+    const date = new Date(t.created_at).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+    return `<div class="topic-row" onclick="openTopicSB(${t.id})">
+      <div class="topic-icon">${t.icon || '💬'}</div>
+      <div class="topic-info">
+        <div class="topic-title">${esc(t.title)}</div>
+        <div class="topic-sub">${t.category || 'Discussion'} · par ${t.author_name || 'Membre'}</div>
+      </div>
+      <div class="topic-meta">
+        <div class="topic-count">${count} réponse${count > 1 ? 's' : ''}</div>
+        <div class="topic-date">${date}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-async function acceptChallenge(id, cadence) {
-  current_game_id = id;
-  await sb.from('games').update({ status: 'in_progress' }).eq('id', id);
-  startLiveGame(id, 'black', cadence);
+async function openTopicSB(id) {
+  curTopic = id;
+  const { data: topic } = await sb.from('forum_topics').select('*').eq('id', id).single();
+  if (!topic) return;
+  document.getElementById('forum-list-view').style.display = 'none';
+  document.getElementById('new-topic-form').style.display = 'none';
+  document.getElementById('forum-detail').style.display = 'block';
+  document.getElementById('detail-title').textContent = topic.title;
+  document.getElementById('reply-inp').value = '';
+  await loadRepliesFromSB(id);
 }
 
-function startLiveGame(id, color, cadence) {
-  current_game_id = id; myColor = color.charAt(0);
-  document.getElementById('game-lobby').classList.add('hidden');
-  document.getElementById('game-board-area').classList.remove('hidden');
-  initBoard(); 
-  board.orientation(color);
-  startClocks(cadence);
+async function loadRepliesFromSB(topicId) {
+  const { data } = await sb.from('forum_replies')
+    .select('*')
+    .eq('topic_id', topicId)
+    .order('created_at', { ascending: true });
+  const count = data?.length || 0;
+  document.getElementById('detail-meta').textContent = `${count} réponse${count > 1 ? 's' : ''}`;
+  document.getElementById('detail-posts').innerHTML = (data || []).map(r => {
+    const init = (r.author_name || 'M').substring(0, 2).toUpperCase();
+    const date = new Date(r.created_at).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+    return `<div class="forum-post">
+      <div class="fp-hd">
+        <div class="fp-av">${init}</div>
+        <div><div class="fp-name">${r.author_name || 'Membre'}</div><div class="fp-date">${date}</div></div>
+      </div>
+      <div class="fp-body">${esc(r.body)}</div>
+    </div>`;
+  }).join('');
 }
 
-async function doLogout() {
-    await sb.from('profiles').update({ is_online: false }).eq('id', me.id);
-    await sb.auth.signOut();
-    location.reload();
+function backToForum() {
+  document.getElementById('forum-detail').style.display = 'none';
+  document.getElementById('forum-list-view').style.display = 'block';
+  curTopic = null;
 }
 
 function toggleNTF() {
-    const f = document.getElementById('new-topic-form');
-    f.style.display = f.style.display === 'block' ? 'none' : 'block';
+  const f = document.getElementById('new-topic-form');
+  f.style.display = f.style.display === 'block' ? 'none' : 'block';
+}
+
+async function submitTopic() {
+  const title = document.getElementById('ntf-title').value.trim();
+  const cat = document.getElementById('ntf-cat').value;
+  const body = document.getElementById('ntf-body').value.trim();
+  if (!title || !body) { showToast('⚠️ Titre et message requis.'); return; }
+  const icon = cat.split(' ')[0];
+  const { data, error } = await sb.from('forum_topics').insert([{
+    title, category: cat.replace(/^.\s/, ''), icon,
+    author_id: me.id, author_name: me.name
+  }]).select().single();
+  if (error) { showToast('❌ Erreur de publication.'); return; }
+  await sb.from('forum_replies').insert([{
+    topic_id: data.id, body, author_id: me.id, author_name: me.name
+  }]);
+  document.getElementById('ntf-title').value = '';
+  document.getElementById('ntf-body').value = '';
+  toggleNTF();
+  showToast('✅ Sujet publié !');
+}
+
+async function submitReply() {
+  const text = document.getElementById('reply-inp').value.trim();
+  if (!text) { showToast('⚠️ Réponse vide.'); return; }
+  if (!curTopic) return;
+  const { error } = await sb.from('forum_replies').insert([{
+    topic_id: curTopic, body: text, author_id: me.id, author_name: me.name
+  }]);
+  if (error) { showToast('❌ Erreur de publication.'); return; }
+  document.getElementById('reply-inp').value = '';
+  showToast('✅ Réponse publiée !');
+}
+
+function renderLocalTopics() {
+  document.getElementById('topics-list').innerHTML =
+    '<div class="empty-state"><div class="ei">📋</div><p>Forum Supabase non connecté.<br>Créez les tables <code>forum_topics</code> et <code>forum_replies</code>.</p></div>';
+}
+
+/* ═══════════════════════════
+   ÉCHIQUIER
+═══════════════════════════ */
+function updateStatus() {
+  if (!game) return;
+  const turn = game.turn() === 'w' ? 'Blancs' : 'Noirs';
+  let s;
+  if (game.in_checkmate()) { s = `🏆 Échec et mat ! Victoire des ${turn === 'Blancs' ? 'Noirs' : 'Blancs'}`; stopClocks(); }
+  else if (game.in_draw()) { s = '🤝 Match nul'; stopClocks(); }
+  else { s = `Tour des ${turn}`; if (game.in_check()) s += ' · ⚠️ Échec !'; }
+  document.getElementById('status-display').innerHTML = s;
+}
+
+function updateHistory() {
+  if (!game) return;
+  const m = game.history();
+  let h = '';
+  for (let i = 0; i < m.length; i += 2) {
+    const n = Math.floor(i/2) + 1;
+    h += `<span style="color:var(--g400);margin-right:2px">${n}.</span> ${m[i] || ''} ${m[i+1] || ''}<br>`;
+  }
+  const el = document.getElementById('history-display');
+  el.innerHTML = h;
+  el.scrollTop = el.scrollHeight;
+}
+
+function removeHL() { $('#board .square-55d63').removeClass('highlight'); }
+function addHL(sq) {
+  removeHL();
+  if (!game) return;
+  game.moves({ square: sq, verbose: true }).forEach(mv => $('#board .square-' + mv.to).addClass('highlight'));
+}
+
+async function onDrop(src, tgt) {
+  removeHL();
+
+  // Bloquer les coups de l'adversaire
+  if (playerColor !== 'both') {
+    const myTurn = (game.turn() === 'w' && playerColor === 'white') ||
+                   (game.turn() === 'b' && playerColor === 'black');
+    if (!myTurn) return 'snapback';
+  }
+
+  const move = game.move({ from: src, to: tgt, promotion: 'q' });
+  if (!move) return 'snapback';
+
+  addIncrement();
+  updateStatus();
+  updateHistory();
+  updateClockDisplay();
+
+  if (current_game_id) {
+    await sb.from('games').update({
+      pgn: game.pgn(),
+      last_move: move.san,
+      last_move_by: me.id
+    }).eq('id', current_game_id);
+  }
+}
+
+function undoMove() {
+  if (game) { game.undo(); board.position(game.fen()); updateStatus(); updateHistory(); }
+}
+
+function resetGame() {
+  if (game) { game = new Chess(); board.start(); updateStatus(); updateHistory(); }
+}
+
+function initBoard() {
+  if (board) return;
+  game = new Chess();
+  board = Chessboard('board', {
+    draggable: true,
+    position: 'start',
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+    onDrop: onDrop,
+    onMouseoverSquare: sq => addHL(sq),
+    onMouseoutSquare: () => removeHL(),
+    onSnapEnd: () => board.position(game.fen()),
+  });
+  updateStatus();
+  updateHistory();
+  setTimeout(() => board.resize(), 80);
+}
+
+/* ═══════════════════════════
+   UTILS
+═══════════════════════════ */
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 </script>
 </body>
